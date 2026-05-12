@@ -1,0 +1,130 @@
+.header {
+  margin-bottom: var(--space-2xl);
+}
+
+.greeting {
+  font-size: clamp(var(--font-2xl), 4vw, var(--font-4xl));
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: var(--font-lg);
+  margin-top: var(--space-sm);
+}
+
+/* ============================================================
+   STATS GRID
+   ============================================================ */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-2xl);
+}
+
+.statCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.statIcon {
+  font-size: var(--font-3xl);
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.statLabel {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.statValue {
+  font-size: var(--font-2xl);
+  font-weight: 700;
+}
+
+.statusActive {
+  color: #00b894;
+}
+
+.statusInactive {
+  color: var(--text-muted);
+  font-size: var(--font-lg);
+}
+
+/* ============================================================
+   QUICK ACTIONS
+   ============================================================ */
+.sectionTitle {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+}
+
+.actionsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: var(--space-md);
+}
+
+.actionCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.actionCard:hover {
+  transform: translateY(-2px);
+}
+
+.actionIcon {
+  font-size: var(--font-3xl);
+}
+
+.actionLabel {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.actionDesc {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (min-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .actionsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .actionsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

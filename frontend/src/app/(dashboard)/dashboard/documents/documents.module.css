@@ -1,0 +1,220 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.title {
+  font-size: var(--font-2xl);
+  font-weight: 800;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  margin-top: var(--space-xs);
+}
+
+/* ============================================================
+   DOCUMENT LIST
+   ============================================================ */
+.docList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.docCard {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.docInfo {
+  display: flex;
+  gap: var(--space-md);
+  flex: 1;
+  min-width: 0;
+}
+
+.docIcon {
+  font-size: var(--font-2xl);
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.docDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.docTitle {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.docTitle:hover {
+  color: var(--accent-primary);
+}
+
+.docMeta {
+  display: flex;
+  gap: var(--space-sm);
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.docSummary {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-sm);
+  line-height: 1.5;
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-md);
+  animation: fadeIn 150ms ease;
+}
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  width: 100%;
+  max-width: 480px;
+  box-shadow: var(--shadow-lg);
+}
+
+.modalTitle {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-lg);
+}
+
+.formGroup {
+  margin-bottom: var(--space-md);
+}
+
+.fileInput {
+  padding: var(--space-sm);
+}
+
+.fileHint {
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-lg);
+}
+
+.deleteWarning {
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
+  line-height: 1.6;
+}
+
+/* ============================================================
+   STATES
+   ============================================================ */
+.emptyState {
+  text-align: center;
+  padding: var(--space-3xl) var(--space-md);
+  color: var(--text-secondary);
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: var(--space-md);
+}
+
+.emptyState h3 {
+  font-size: var(--font-xl);
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.emptyState p {
+  margin-bottom: var(--space-lg);
+}
+
+.errorState {
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--error);
+}
+
+.errorState button {
+  margin-top: var(--space-md);
+}
+
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.skeletonCard {
+  padding: var(--space-lg);
+}
+
+.skeletonTitle {
+  height: 20px;
+  width: 60%;
+  margin-bottom: var(--space-sm);
+}
+
+.skeletonMeta {
+  height: 14px;
+  width: 40%;
+}
+
+/* ============================================================
+   PAGINATION
+   ============================================================ */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  margin-top: var(--space-xl);
+}
+
+.pageInfo {
+  font-size: var(--font-sm);
+  color: var(--text-secondary);
+}
