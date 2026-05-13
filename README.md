@@ -70,7 +70,7 @@ Building a functional AI prototype is simple, but building a **SaaS-ready intell
 ## 🛠️ Technical Architecture
 
 ### Frontend
-- **Framework:** Next.js 14+ (App Router)
+- **Framework:** Next.js 16+ (App Router)
 - **Styling:** Vanilla CSS with custom Design Tokens (Modular & Performance-focused)
 - **State Management:** React Hooks + Context API
 - **QA:** Playwright (Cross-browser verification)
@@ -83,10 +83,10 @@ Building a functional AI prototype is simple, but building a **SaaS-ready intell
 
 ---
 
-## 🛡️ Engineering Standards
+## 🛡️ Engineering Principles
 
-### 1. The Adaptive Layout Law
-NexusDoc follows a strict "Restructuring-over-Shrinking" law. Instead of just scaling down, the UI intelligently transforms (e.g., sidebar-to-toggle transitions) to ensure accessibility on all devices.
+### 1. Responsive Adaptation & Fluidity
+NexusDoc implements a sophisticated adaptive layout engine. Instead of simply scaling down, the UI intelligently transforms (e.g., sidebar-to-toggle transitions) to ensure peak accessibility and ergonomics on all devices.
 
 ### 2. QA Automation (Playwright)
 Every core flow—from Authentication to Document Upload—is protected by automated E2E tests. 
@@ -108,15 +108,15 @@ npx playwright test
 NexusDoc is architected for **Multi-Cloud Resilience**, ensuring high availability and sub-50ms latency for global intelligence requests.
 
 ### 1. Frontend (Vercel)
-- **Deployment**: The Next.js 14 frontend is deployed to Vercel's Global Edge Network.
+- **Deployment**: The Next.js 16+ frontend is deployed to Vercel's Global Edge Network.
 - **Performance**: Leveraging Edge Middleware for sub-10ms localized routing and automated image optimization.
 
 ### 2. Backend (Render)
-- **Deployment**: The Node.js/TypeScript backend is hosted on Render's managed compute layer.
+- **Deployment**: The Node.js 20+ backend is hosted on Render's managed compute layer.
 - **Availability**: Integrated with `cron-job.org` to maintain a "warm" instance state, preventing cold-boot latency on serverless/hobby tiers.
 
 ### 3. Database (Neon)
-- **Engine**: Serverless PostgreSQL (v16).
+- **Engine**: Serverless PostgreSQL (v16+).
 - **Features**: Utilizes Neon's database branching for zero-risk schema migrations and point-in-time recovery for absolute data integrity.
 
 ---
