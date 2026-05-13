@@ -6,6 +6,12 @@
 
 **NexusDoc** is a production-grade Document Intelligence platform that leverages the Gemini AI engine to provide semantic search, automated summarization, and vector-based extraction for PDFs and text files. It is built with a "Security-First" and "QA-First" philosophy, designed to demonstrate senior-level full-stack and AI engineering competence.
 
+## 🎯 Why NexusDoc?
+In a world of subscription-based AI services, NexusDoc stands out as a **Sovereign Intelligence Vault.** 
+- **Data Sovereignty:** Unlike standard SaaS products, NexusDoc uses a "Bring Your Own Key" (BYOK) architecture, ensuring that the user remains the absolute owner of their data and AI costs.
+- **Privacy-First:** Every document and API key is shielded by AES-256-GCM encryption, ensuring that even in a multi-tenant environment, intelligence remains private.
+- **Infinite Scalability:** By removing the middleman, NexusDoc allows power users and students to scale their document research to thousands of pages with zero service markups.
+
 ---
 
 ## 🚀 Key Features
