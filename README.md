@@ -97,10 +97,27 @@ npx playwright test
 ```
 
 ### 3. CI/CD Pipeline
-The repository is protected by a GitHub Actions pipeline that performs:
 - Full build verification.
 - TypeScript type-checking (`tsc --noEmit`).
 - Automated Playwright browser tests on every push.
+
+---
+
+## 🏗️ Strategic Deployment
+
+NexusDoc is architected for **Multi-Cloud Resilience**, ensuring high availability and sub-50ms latency for global intelligence requests.
+
+### 1. Frontend (Vercel)
+- **Deployment**: The Next.js 14 frontend is deployed to Vercel's Global Edge Network.
+- **Performance**: Leveraging Edge Middleware for sub-10ms localized routing and automated image optimization.
+
+### 2. Backend (Render)
+- **Deployment**: The Node.js/TypeScript backend is hosted on Render's managed compute layer.
+- **Availability**: Integrated with `cron-job.org` to maintain a "warm" instance state, preventing cold-boot latency on serverless/hobby tiers.
+
+### 3. Database (Neon)
+- **Engine**: Serverless PostgreSQL (v16).
+- **Features**: Utilizes Neon's database branching for zero-risk schema migrations and point-in-time recovery for absolute data integrity.
 
 ---
 
