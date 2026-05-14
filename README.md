@@ -12,15 +12,21 @@ In a world of subscription-based AI services, NexusDoc stands out as a **Soverei
 - **Privacy-First:** Every document and API key is shielded by AES-256-GCM encryption, ensuring that even in a multi-tenant environment, intelligence remains private.
 - **Infinite Scalability:** By removing the middleman, NexusDoc allows power users and students to scale their document research to thousands of pages with zero service markups.
 
+## 👥 Targeted Population
+NexusDoc is designed for the modern "Knowledge Professional" who manages high volumes of unstructured data:
+- **Academic Researchers**: Students and researchers who need to synthesize hundreds of pages of literature into actionable intelligence.
+- **Legal & Compliance Officers**: Professionals who require secure, private indexing of sensitive documents without leaking data to public LLM training sets.
+- **Technical Writers**: Engineers who need to semantically search through large documentation repositories to find technical relationships instantly.
+
 ---
 
 ## 🚀 Key Features
 
-- **AI-Powered Summarization:** Instant, rich-text insights from complex documents using Google's Gemini 1.5 Flash.
+- **AI-Powered Summarization:** Near-real-time, rich-text insights from complex documents using your private AI configuration.
 - **Semantic Vector Search:** Find information based on meaning, not just keywords, using high-dimensional embeddings.
 - **Security Hardened:** Multi-tier rate limiting, AES-256 encryption for API keys, and JWT-based session management.
 - **Adaptive Responsive Design:** A "True Responsive" UI that restructures itself across Mobile, Tablet, and Desktop viewports.
-- **DevOps Integrated:** Automated CI/CD pipelines with Playwright E2E testing for 100% layout integrity.
+- **DevOps Integrated:** Automated CI/CD pipelines with Playwright E2E testing for automated layout verification.
 
 ## 📸 Visual Overview
 
@@ -47,7 +53,7 @@ Building a functional AI prototype is simple, but building a **SaaS-ready intell
 
 ### 1. The Vector Dimensionality Mismatch
 **Challenge:** Modern AI models (like Gemini) can output embeddings in varying dimensions (768, 1536, 3072). Mismatching these with a fixed-dimension PostgreSQL `vector` column causes fatal database crashes.
-**Solution:** Developed an **Adaptive Dimension Normalizer** in the backend. It dynamically truncates (via Matryoshka learning) or pads vectors to exactly 768 dimensions, ensuring database stability regardless of the model used.
+**Solution:** Developed an **Adaptive Dimension Normalizer** in the backend. It utilizes **Matryoshka-Style Truncation** or padding to align vectors to exactly 768 dimensions, ensuring database stability regardless of the model used.
 
 ### 2. The Adaptive Layout Law
 **Challenge:** Complex dashboards often "break" on mobile devices, leading to horizontal overflow and "clipping" that frustrates users.

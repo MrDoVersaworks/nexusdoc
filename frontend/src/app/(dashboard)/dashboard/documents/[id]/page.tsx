@@ -204,7 +204,7 @@ export default function DocumentDetailPage() {
       {showRawText && (
         <section className={styles.contentSection}>
           <div className={styles.contentText}>
-            {document.content_text}
+            <ReactMarkdown>{document.content_text}</ReactMarkdown>
           </div>
         </section>
       )}
