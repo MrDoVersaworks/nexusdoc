@@ -24,7 +24,7 @@ export default function GuidePage() {
             </ul>
           </div>
           <p>
-            NexusDoc utilizes <strong>Matryoshka Representation Learning (MRL)</strong> via an Adaptive Dimension Normalizer to safely compress larger AI vectors down to exactly 768 dimensions. This ensures lightning-fast database queries via <code>pgvector</code> without losing semantic meaning.
+            NexusDoc utilizes <strong>Matryoshka-Style Truncation</strong> via an Adaptive Dimension Normalizer to safely align larger AI vectors to exactly 768 dimensions. This ensures high-performance database queries via <code>pgvector</code> while maintaining core semantic relationships.
           </p>
         </div>
       </section>
@@ -33,7 +33,7 @@ export default function GuidePage() {
         <h2 className={styles.sectionTitle}>✨ 2. Generative AI Summarization</h2>
         <div className={styles.sectionContent}>
           <p>
-            When a document is uploaded, it is passed through the Gemini Large Language Model (e.g., <code>gemini-1.5-flash</code>) to extract immediate insights.
+            When a document is uploaded, it is passed through your configured Gemini Large Language Model (e.g., <code>gemini-1.5-flash</code>) to extract deep technical insights.
           </p>
           <ul className={styles.list}>
             <li><strong>Automated Insights:</strong> It automatically identifies the main topic, key bullet points, entities, and takeaways.</li>
@@ -49,7 +49,7 @@ export default function GuidePage() {
             NexusDoc is built with strict, deterministic security laws to ensure absolute data sovereignty.
           </p>
           <ul className={styles.list}>
-            <li><strong>AES-256-GCM Encryption:</strong> Your Google API Key is encrypted at the database level. Only the application backend has the master key to decrypt it during execution.</li>
+            <li><strong>AES-256-GCM Encryption:</strong> Your Google API Key is encrypted at the database level. Only the application backend can decrypt it in volatile memory during technical orchestration.</li>
             <li><strong>Cloud Storage:</strong> Original files are stored securely in Vercel Blob with strict access tokens.</li>
             <li><strong>Total Account Deletion:</strong> The "Danger Zone" in your settings performs a cascading wipe. If you delete your account, every single document, chunk, vector, and API key associated with you is permanently destroyed.</li>
           </ul>

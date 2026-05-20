@@ -61,6 +61,19 @@ export default function RegisterPage() {
           <p>Create your account</p>
         </div>
 
+        <div className="flex items-center gap-3 p-4 mb-6 bg-accent-blue/5 border border-accent-blue/10 rounded-xl">
+          <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-accent-blue/10 rounded-lg text-accent-blue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
+          </div>
+          <div>
+            <p className="text-xs font-bold text-accent-blue uppercase tracking-widest mb-1">Frictionless Client Demo</p>
+            <p className="text-[10px] text-text-muted leading-relaxed">
+              Email verification is temporarily disabled to allow immediate, seamless access. 
+              You may use any dummy email to proceed.
+            </p>
+          </div>
+        </div>
+
         <form className={styles.authForm} onSubmit={handleSubmit} id="register-form">
           {error && <div className={styles.authError}>{error}</div>}
 

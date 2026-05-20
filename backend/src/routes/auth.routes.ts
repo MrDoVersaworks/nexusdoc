@@ -89,7 +89,7 @@ router.post('/refresh', asyncHandler(async (req: Request, res: Response): Promis
     const refreshToken = req.cookies[REFRESH_COOKIE_NAME];
 
     if (!refreshToken) {
-      res.status(401).json({
+      res.status(200).json({
         success: false,
         error: { code: 'ERR_AUTH_REFRESH_FAILED', message: 'No refresh token provided.' },
       });
@@ -105,7 +105,7 @@ router.post('/refresh', asyncHandler(async (req: Request, res: Response): Promis
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ERR_AUTH_REFRESH_FAILED')) {
       res.clearCookie(REFRESH_COOKIE_NAME, { path: '/' });
-      res.status(401).json({
+      res.status(200).json({
         success: false,
         error: { code: 'ERR_AUTH_REFRESH_FAILED', message: 'Invalid or expired refresh token. Please log in again.' },
       });

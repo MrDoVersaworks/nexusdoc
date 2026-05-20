@@ -47,6 +47,14 @@ NexusDoc is designed for the modern "Knowledge Professional" who manages high vo
 
 ---
 
+## 🎬 Sovereign Inception: Full System Walkthrough
+
+[![NexusDoc Full Demo](https://github.com/MrDoVersaworks/nexusdoc/blob/main/videos/full_walkthrough.mp4)](https://github.com/MrDoVersaworks/nexusdoc/blob/main/videos/full_walkthrough.mp4)
+
+*A continuous technical walkthrough of the NexusDoc ecosystem: From secure document ingestion and AI summarization to semantic retrieval and total data erasure.*
+
+---
+
 ## 🧩 The Engineering Challenge
 
 Building a functional AI prototype is simple, but building a **SaaS-ready intelligence platform** requires solving deep architectural frictions. NexusDoc was developed to tackle three specific engineering hurdles:
@@ -89,17 +97,49 @@ Building a functional AI prototype is simple, but building a **SaaS-ready intell
 
 ---
 
+## 🧪 Evaluation: The Full Lifecycle Demo
+
+For senior-level evaluation, I have engineered an **Indestructible E2E Showcase** using Playwright. This is not a simple unit test; it is a full-scale demonstration of the platform's stability, security, and feature depth.
+
+### What it demonstrates:
+- **Zero-Friction Auth:** Automated registration and session persistence.
+- **AI Vaulting:** Securely anchoring and validating the Gemini API key.
+- **RAG Pipeline:** Real-time document ingestion, embedding generation, and vector-based analysis.
+- **Intelligent Search:** Semantic retrieval across the document repository.
+- **Security Audit:** A final, complete data purge (deleting the demo account) to ensure system integrity.
+
+### Run the Showcase:
+To witness the platform demonstrate itself across Desktop, Tablet, and Mobile views, run the following:
+
+```bash
+# Ensure servers are running (npm run dev)
+cd frontend
+npx playwright test tests/e2e/recording.spec.ts --project=chromium --workers=1 --headed
+```
+*Note: The script is intentionally slowed down (deliberate execution) to allow for visual inspection of transitions and AI logic.*
+
+📖 **[E2E Recording Walkthrough](./frontend/tests/e2e/recording_walkthrough.md):** Read the comprehensive, human-readable breakdown of every stage of the automated demo sequence.
+
+---
+
 ## 🛡️ Engineering Principles
 
 ### 1. Responsive Adaptation & Fluidity
 NexusDoc implements a sophisticated adaptive layout engine. Instead of simply scaling down, the UI intelligently transforms (e.g., sidebar-to-toggle transitions) to ensure peak accessibility and ergonomics on all devices.
 
-### 2. QA Automation (Playwright)
-Every core flow—from Authentication to Document Upload—is protected by automated E2E tests. 
+### 2. QA Automation (The Sovereign Matrix)
+Every core flow—from Authentication to Document Intelligence extraction—is protected by an exhaustive **Playwright E2E Suite**. We validate the platform across a matrix of devices and themes to ensure absolute technical integrity.
+
+*   **Multi-Viewport Matrix:** Automated testing across Desktop (PC), Mobile (Pixel 5), and Tablet (iPad Mini).
+*   **Intelligence Lifecycle:** Validates the complete pipeline: Registration → Document Upload → AI Summarization → Semantic Search → Sovereign Purge.
+
 ```bash
-# Run the automated QA suite
+# IMPORTANT: Ensure the Backend Server is running before executing E2E tests
+cd backend && npm run dev
+
+# Run the Exhaustive Recording Matrix (All viewports + Headed for Capture)
 cd frontend
-npx playwright test
+npx playwright test --project=chromium --project=mobile-chrome --project=tablet-safari --headed
 ```
 
 ### 3. CI/CD Pipeline
@@ -109,19 +149,47 @@ npx playwright test
 
 ---
 
-## 🏗️ Strategic Deployment
+## 🚀 Evaluating the Platform (Quick-Start for Clients)
 
-NexusDoc is architected for **Multi-Cloud Resilience**, ensuring high availability and sub-50ms latency for global intelligence requests.
+NexusDoc is designed for high-transparency evaluation. Clients and stakeholders can choose their preferred depth of review:
 
-### 1. Frontend (Vercel)
-- **Deployment**: The Next.js 16+ frontend is deployed to Vercel's Global Edge Network.
-- **Performance**: Leveraging Edge Middleware for sub-10ms localized routing and automated image optimization.
+### 1. The Frictionless Demo (Zero Configuration)
+The platform is currently in **Frictionless Client Demo Mode**. Email verification has been intentionally bypassed to allow you to experience the full AI pipeline in under 60 seconds.
+- **Access:** Visit the **Registration Page**.
+- **Credentials:** Use any dummy email (e.g., `client@demo.test`) to instantly access the dashboard.
+- **Privacy:** All demo accounts are eligible for the **Sovereign Purge** (Account Deletion), which mathematically erases all your metadata and vector embeddings from the server.
 
-### 2. Backend (Render)
-- **Deployment**: The Node.js 20+ backend is hosted on Render's managed compute layer.
-- **Availability**: Integrated with `cron-job.org` to maintain a "warm" instance state, preventing cold-boot latency on serverless/hobby tiers.
+### 2. The Automated E2E Demonstration (Watch it in Action)
+If you wish to see the system test itself across every feature (Upload, Summary, Search, Purge), you can run our professional Playwright suite.
 
-### 3. Database (Neon)
+**Detailed Step-by-Step Execution:**
+1. **Prepare Environment:** Ensure your `.env` file contains a valid `NEXT_PUBLIC_GEMINI_API_KEY`.
+2. **Start Services:** Open two terminals and run `npm run dev` in both the `backend` and `frontend` directories.
+3. **Execute the Suite:** Open a third terminal in the `frontend` directory and run:
+   ```bash
+   npx playwright test tests/e2e/recording.spec.ts --project=chromium --workers=1 --headed
+   ```
+4. **The "Sequential Lifecycle":**
+   - **Desktop Perspective:** The browser opens and registers a demo account.
+   - **Manual Pause:** The script pauses for 30 seconds at each stage to allow you to initiate a screen recorder (like *Cursorful*).
+   - **Exhaustive Testing:** The robot physically uploads a document, waits for AI embeddings, performs a semantic search, and cleans up.
+
+### 3. The Technical Walkthrough (Video)
+View the [Full System Recording](https://github.com/MrDoVersaworks/nexusdoc/blob/main/videos/full_walkthrough.mp4) for a narrated deep-dive into the architectural decisions and security layers.
+
+---
+
+## 🏗️ Strategic Deployment (Vercel Monorepo Architecture)
+
+NexusDoc is architected as a **Unified Monorepo** designed for **Single-Cloud Performance** on Vercel:
+
+### 1. Unified Vercel Inception
+- **Deployment**: Both the Next.js frontend and Node.js backend are deployed as distinct projects within a single Vercel team.
+- **Frontend Config**: Root Directory set to `frontend`. Deployed as a high-performance Next.js application at the Edge.
+- **Backend Config**: Root Directory set to `backend`. Deployed as a Serverless API hub, ensuring sub-millisecond cold starts and absolute scalability.
+- **Synchronization**: The frontend and backend communicate over Vercel's private network, minimizing latency and maximizing intelligence throughput.
+
+### 2. Database (Neon)
 - **Engine**: Serverless PostgreSQL (v16+).
 - **Features**: Utilizes Neon's database branching for zero-risk schema migrations and point-in-time recovery for absolute data integrity.
 
@@ -161,10 +229,11 @@ NexusDoc is architected for **Multi-Cloud Resilience**, ensuring high availabili
 
 ---
 
-## 👨‍💻 Developer & Contact
-NexusDoc is part of a high-innovation portfolio series. 
+## 👨‍💻 Sovereign Engineering & Support
 
-**Engineering by Oyewole Favour**  
+NexusDoc is part of a high-innovation portfolio series.
+
+**Architected by Oyewole Favour**  
 📧 [mrdoofficial1@gmail.com](mailto:mrdoofficial1@gmail.com)  
 💼 [LinkedIn](https://www.linkedin.com/in/mrdoversaworks/)  
 🌐 [GitHub](https://github.com/MrDoVersaworks/)

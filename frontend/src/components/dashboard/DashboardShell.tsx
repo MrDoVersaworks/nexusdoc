@@ -38,12 +38,11 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
     }
   }
 
-  let userInitial = '?';
-  if (user && user.name) {
-    userInitial = user.name.charAt(0).toUpperCase();
-  } else if (user && user.email) {
-    userInitial = user.email.charAt(0).toUpperCase();
-  }
+  const userInitial = (() => {
+    if (user && user.name) return user.name.charAt(0).toUpperCase();
+    if (user && user.email) return user.email.charAt(0).toUpperCase();
+    return '?';
+  })();
 
   return (
     <div className={styles.shell}>
@@ -95,13 +94,14 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         <div className={styles.sidebarFooter}>
           <div className={styles.userInfo}>
             <div className={styles.userAvatar}>{userInitial}</div>
-            <div>
+            <div className={styles.userTextWrapper}>
               <div className={styles.userName}>{user?.name}</div>
               <div className={styles.userEmail}>{user?.email}</div>
             </div>
           </div>
           <div className={styles.contactDev}>
-            <p className={styles.contactTitle}>Contact Developer</p>
+            <p className={styles.contactTitle}>Sovereign Support</p>
+            <p className={styles.architectName}>Architected by Oyewole Favour</p>
             <a href="mailto:mrdoofficial1@gmail.com" className={styles.contactEmail}>
               mrdoofficial1@gmail.com
             </a>

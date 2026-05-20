@@ -8,6 +8,8 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 export const metadata: Metadata = {
   title: 'NexusDoc — AI Document Intelligence',
   description: 'Upload, analyze, and semantically search your documents with AI-powered intelligence. Summarize PDFs, extract insights, and find information instantly.',
+  keywords: ['AI document analysis', 'semantic search', 'PDF summarization', 'document intelligence', 'AI RAG'],
+  authors: [{ name: 'Oyewole Favour' }],
   openGraph: {
     title: 'NexusDoc — AI Document Intelligence',
     description: 'Upload, analyze, and semantically search your documents with AI-powered intelligence.',
