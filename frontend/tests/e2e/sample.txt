@@ -1,2 +1,0 @@
-Quantum Computing Architecture
-This document outlines the foundational architecture of quantum processors. Quantum supremacy is achieved when a quantum computer can solve a problem that no classical computer can solve in any feasible amount of time. The architecture relies on qubits, which can exist in multiple states simultaneously due to superposition.
