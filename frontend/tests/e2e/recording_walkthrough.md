@@ -87,4 +87,13 @@ graph TD
 > **API Key Safety:** The E2E script retrieves the `GEMINI_API_KEY` dynamically from the local backend env file without ever exposing it in plain text to the public repository or logs.
 
 > [!TIP]
-> **Recording Demos:** To record this protocol for presentation, run Playwright with the `--headed` flag and record with a screen capture utility. The deliberate pauses ensure the viewer has ample time to read the dynamic prompts and text overlays.
+> **Headed Recording:** To record a video demo with a visible browser window, run:
+> ```bash
+> cd frontend
+> HEADED=1 npx playwright test
+> ```
+> On Windows PowerShell:
+> ```powershell
+> cd frontend
+> $env:HEADED=1; npx playwright test
+> ```

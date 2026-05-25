@@ -13,11 +13,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark');
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Only access localStorage on the client
-    setMounted(true);
     const storedTheme = localStorage.getItem('nexusdoc-theme') as Theme | null;
     if (storedTheme) {
       setTheme(storedTheme);
@@ -35,11 +32,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.setAttribute('data-theme', newTheme);
   };
 
-  // Prevent hydration mismatch by not rendering until mounted
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
+  // Always render the Provider so useTheme() never sees undefined during
+  // SSR / static prerender. The blocking <script> in layout.tsx already
+  // sets data-theme before first paint, so there is no FOUC.
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}

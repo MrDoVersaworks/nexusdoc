@@ -42,7 +42,7 @@ for (const vp of viewports) {
   test(`Full Lifecycle Demo - ${vp.name}`, async ({ }) => {
     test.setTimeout(300000); // 5 minutes timeout for the deliberate pace
     const browser = await chromium.launch({ 
-      headless: false,
+      headless: !process.env.HEADED, // Run: HEADED=1 npx playwright test
     });
     
     const context = await browser.newContext({

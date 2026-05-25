@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, integer, customType } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, timestamp, integer, customType, index } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 import { EMBEDDING_DIMENSION } from '../constants';
 
@@ -76,7 +76,10 @@ export const documentChunks = pgTable('document_chunks', {
   chunk_index: integer('chunk_index').notNull(),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => ({
+  docIdIdx: index('dc_document_id_idx').on(table.document_id),
+  userIdIdx: index('dc_user_id_idx').on(table.user_id),
+}));
 
 // ============================================================
 // RELATIONS

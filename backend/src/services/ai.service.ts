@@ -89,12 +89,8 @@ export async function generateEmbeddings(
   embeddingModelName: string,
   texts: string[]
 ): Promise<number[][]> {
-  const embeddings: number[][] = [];
-
-  for (const text of texts) {
-    const embedding = await generateEmbedding(apiKey, embeddingModelName, text);
-    embeddings.push(embedding);
-  }
-
-  return embeddings;
+  logger.info('AI_SERVICE', `Generating embeddings for ${texts.length} items in parallel...`);
+  return Promise.all(
+    texts.map((text) => generateEmbedding(apiKey, embeddingModelName, text))
+  );
 }

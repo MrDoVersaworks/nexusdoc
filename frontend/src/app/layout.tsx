@@ -24,6 +24,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning={true}>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var storedTheme = localStorage.getItem('nexusdoc-theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', storedTheme);
+                if (storedTheme === 'dark') {
+                  document.documentElement.style.backgroundColor = '#09090f';
+                } else {
+                  document.documentElement.style.backgroundColor = '#f8fafc';
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body>
         <ThemeProvider>
           <AuthProvider>
