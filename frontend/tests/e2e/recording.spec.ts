@@ -42,7 +42,7 @@ for (const vp of viewports) {
   test(`Full Lifecycle Demo - ${vp.name}`, async ({ }) => {
     test.setTimeout(300000); // 5 minutes timeout for the deliberate pace
     const browser = await chromium.launch({ 
-      headless: !process.env.HEADED, // Run: HEADED=1 npx playwright test
+      headless: false, // Forces Chrome to open visibly
     });
     
     const context = await browser.newContext({
@@ -169,6 +169,14 @@ for (const vp of viewports) {
           if (await downloadBtn.isVisible()) {
               await downloadBtn.click();
               await page.waitForTimeout(1000);
+
+              // Handle C17 Security Preflight Warning Modal if visible
+              const confirmBtn = page.getByRole('button', { name: /Acknowledge & Download/i });
+              if (await confirmBtn.isVisible()) {
+                  console.log(`[SOVEREIGN] ${vp.name}: Acknowledging Security Preflight Warning...`);
+                  await confirmBtn.click();
+                  await page.waitForTimeout(1500);
+              }
           }
           
           const rawTextBtn = page.getByRole('button', { name: /View AI Raw Extraction/i });

@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/contexts/ThemeContext';
 import { toast } from 'sonner';
 import ApiKeyBanner from './ApiKeyBanner';
+import ContactModal from '../shared/ContactModal';
 import styles from './DashboardShell.module.css';
 
 interface NavLink {
@@ -28,6 +29,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [contactOpen, setContactOpen] = useState(false);
 
   async function handleLogout() {
     try {
@@ -102,9 +104,13 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           <div className={styles.contactDev}>
             <p className={styles.contactTitle}>Sovereign Support</p>
             <p className={styles.architectName}>Architected by Oyewole Favour</p>
-            <a href="mailto:mrdoofficial1@gmail.com" className={styles.contactEmail}>
-              mrdoofficial1@gmail.com
-            </a>
+            <button
+              onClick={() => setContactOpen(true)}
+              className={styles.contactEmail}
+              style={{ background: 'none', border: 'none', padding: 0, margin: 0, cursor: 'pointer', display: 'block', width: '100%', textAlign: 'left', fontFamily: 'inherit' }}
+            >
+              Contact Developer
+            </button>
           </div>
           <button
             className={`${styles.navItem}`}
@@ -130,6 +136,8 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         <ApiKeyBanner />
         {children}
       </main>
+
+      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
   );
 }

@@ -19,6 +19,7 @@ export default function DocumentDetailPage() {
   const [error, setError] = useState('');
 
   const [showRawText, setShowRawText] = useState(false);
+  const [preflightDownload, setPreflightDownload] = useState<{ type: 'blob' | 'link'; action: () => void } | null>(null);
 
   const fetchDocument = useCallback(async () => {
     setIsLoading(true);
@@ -62,15 +63,21 @@ export default function DocumentDetailPage() {
   };
 
   const downloadSummary = () => {
-    if (!document?.ai_summary) return;
-    const element = window.document.createElement('a');
-    const file = new Blob([document.ai_summary], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = `${document.title}_summary.txt`;
-    window.document.body.appendChild(element);
-    element.click();
-    window.document.body.removeChild(element);
-    toast.success('Summary downloaded!');
+    const summary = document?.ai_summary;
+    if (!summary) return;
+    setPreflightDownload({
+      type: 'blob',
+      action: () => {
+        const element = window.document.createElement('a');
+        const file = new Blob([summary || ''], { type: 'text/plain' });
+        element.href = URL.createObjectURL(file);
+        element.download = `${document.title}_summary.txt`;
+        window.document.body.appendChild(element);
+        element.click();
+        window.document.body.removeChild(element);
+        toast.success('Summary downloaded!');
+      }
+    });
   };
 
   function formatDate(iso: string): string {
@@ -126,8 +133,15 @@ export default function DocumentDetailPage() {
         <div className={styles.actions}>
           <a 
             href={document.file_url} 
-            target="_blank" 
-            rel="noopener noreferrer" 
+            onClick={(e) => {
+              e.preventDefault();
+              setPreflightDownload({
+                type: 'link',
+                action: () => {
+                  window.open(document.file_url, '_blank', 'noopener,noreferrer');
+                }
+              });
+            }}
             className="btn btn-secondary btn-sm"
           >
             ⬇️ Download Original File
@@ -208,6 +222,117 @@ export default function DocumentDetailPage() {
           </div>
         </section>
       )}
+
+      {preflightDownload && (
+        <div style={modalStyles.overlay} onClick={() => setPreflightDownload(null)}>
+          <div style={modalStyles.modal} onClick={(e) => e.stopPropagation()}>
+            <div style={modalStyles.header}>
+              <h3 style={modalStyles.title}>⚠️ Security Preflight Warning</h3>
+              <button style={modalStyles.closeBtn} onClick={() => setPreflightDownload(null)}>✕</button>
+            </div>
+            
+            <p style={modalStyles.warningText}>
+              You are attempting to download an unverified file. To prevent system infection and protect your workstation, 
+              please open your account and carry out this download within an isolated <strong>Virtual Machine (VM/VirtualBox)</strong>.
+            </p>
+
+            <div style={modalStyles.actions}>
+              <button 
+                type="button" 
+                onClick={() => setPreflightDownload(null)}
+                style={modalStyles.cancelBtn}
+              >
+                Cancel
+              </button>
+              <button 
+                type="button"
+                onClick={() => {
+                  preflightDownload.action();
+                  setPreflightDownload(null);
+                }}
+                style={modalStyles.confirmBtn}
+              >
+                Acknowledge & Download
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+const modalStyles: { [key: string]: React.CSSProperties } = {
+  overlay: {
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(5, 5, 10, 0.85)',
+    backdropFilter: 'blur(8px)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 9999,
+    padding: '20px'
+  },
+  modal: {
+    background: '#0c0f1d',
+    border: '1px solid rgba(225, 112, 117, 0.25)',
+    borderRadius: '16px',
+    padding: '28px',
+    width: '100%',
+    maxWidth: '480px',
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(225, 112, 117, 0.1)',
+    fontFamily: 'inherit'
+  },
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '16px'
+  },
+  title: {
+    margin: 0,
+    fontSize: '18px',
+    fontWeight: '700',
+    color: '#ff7675'
+  },
+  closeBtn: {
+    background: 'none',
+    border: 'none',
+    color: '#a0aed0',
+    fontSize: '20px',
+    cursor: 'pointer',
+    padding: '4px'
+  },
+  warningText: {
+    fontSize: '14px',
+    color: '#e2e8f0',
+    lineHeight: '1.6',
+    margin: '0 0 24px 0'
+  },
+  actions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px'
+  },
+  cancelBtn: {
+    background: 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    color: '#a0aed0',
+    borderRadius: '8px',
+    padding: '10px 18px',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer'
+  },
+  confirmBtn: {
+    background: '#d63031',
+    border: 'none',
+    color: '#fff',
+    borderRadius: '8px',
+    padding: '10px 20px',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer'
+  }
+};

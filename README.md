@@ -75,11 +75,19 @@ Building a functional AI prototype is simple, but building a **SaaS-ready intell
 **Challenge:** Handling AI operational costs for a growing user base while managing the extreme security liability of user-provided API keys.
 **Solution:** Implemented a **"Bring Your Own Key" (BYOK)** architecture. To mitigate security risks, I engineered a **Security Vault** using **AES-256-GCM Encryption**. API keys are encrypted the moment they reach the server, stored as ciphertext in the database, and only decrypted in-memory during active AI sessions—ensuring zero plain-text exposure even in the event of a database leak.
 
-### 5. Future-Proof Model Agnosticism
+### 5. Virtual Machine Sandboxing & Download Isolation Warning Gate
+**Challenge:** Document processing platforms are vulnerable to malicious file uploads containing embedded malware (e.g., PDF active scripting or executable macros) that can attack server indices or download-facing host computers.
+**Solution:** Engineered a **Security Preflight Warning Gate** intercepts. Every time an original document download or AI summary text file export is triggered, the system halts execution and forces a security warning modal overlay instructing the developer to carry out the download inside an isolated **Virtual Machine (VM/VirtualBox)** or sandbox. This protects local host machines from file-embedded payloads.
+
+### 6. RAG Prompt Injection & Database Sanitization
+**Challenge:** Attackers embedding hidden system-override instructions within document uploads to manipulate downstream LLMs (Indirect Prompt Injection) or inject database parsing commands.
+**Solution:** Enforced a **Sterilization boundary layer**. The ingestion pipeline strictly cleans extracted strings and wraps retrieved vector chunks within isolated, marked tags (`<document_context>`) inside LLM prompts, explicitly instructing the AI engine to treat the text as untrusted raw data and block instruction execution. All text content is similarly sanitized to prevent backend SQL/NoSQL command parsing.
+
+### 7. Future-Proof Model Agnosticism
 **Challenge:** The rapid pace of AI evolution makes hard-coded model integrations obsolete within months. 
 **Solution:** Architected a **Model-Agnostic Engine**. Instead of locking the system to a specific version, NexusDoc allows users to dynamically specify their preferred Gemini generation and embedding models via the UI. The backend's adaptive layer ensures that as Google releases newer, more powerful models, NexusDoc "levels up" instantly without requiring a single line of code change or redeployment.
 
-### 6. High-Performance RAG Ingestion Pipeline
+### 8. High-Performance RAG Ingestion Pipeline
 **Challenge:** Generating vector embeddings for long documents can introduce significant latency. Processing chunks sequentially results in substantial wall-clock delay due to repeated API round-trips and individual SQL database inserts.
 **Solution:** Refactored the ingestion pipeline to generate embeddings in parallel batches (concurrency level of 5) using `Promise.allSettled`, followed by a single SQL bulk insert using Drizzle ORM. This optimized pipeline reduced RAG ingestion latencies by up to **80%**.
 
@@ -242,7 +250,7 @@ NexusDoc is architected as a **Unified Monorepo** designed for **Single-Cloud Pe
 NexusDoc is part of a high-innovation portfolio series.
 
 **Architected by Oyewole Favour**  
-📧 [mrdoofficial1@gmail.com](mailto:mrdoofficial1@gmail.com)  
+📧 Contact via the in-app **Contact Form** (accessible from the dashboard sidebar)  
 💼 [LinkedIn](https://www.linkedin.com/in/mrdoversaworks/)  
 🌐 [GitHub](https://github.com/MrDoVersaworks/)
 
