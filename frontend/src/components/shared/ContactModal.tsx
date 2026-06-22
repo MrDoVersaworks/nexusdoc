@@ -12,8 +12,10 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [geminiKey, setGeminiKey] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
+  const [showGuide, setShowGuide] = useState(false);
+  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string; geminiKey?: string }>({});
 
   if (!isOpen) return null;
 
@@ -26,6 +28,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
       newErrors.email = 'Please enter a valid email address';
     }
     if (!message.trim()) newErrors.message = 'Message is required';
+    if (!geminiKey.trim()) newErrors.geminiKey = 'Gemini API Key is required for spam screening';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -37,16 +40,51 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call to structured system notification gateway
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Step 1: Client-Side AI Gatekeeper (BYOK)
+      const aiModel = process.env.NEXT_PUBLIC_GEMINI_MODEL || 'gemini-2.5-flash';
+      const aiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${aiModel}:generateContent?key=${geminiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{ text: `You are a strict security gatekeeper for a software engineer's portfolio. Analyze this incoming contact message. Is it a valid, professional inquiry (e.g., job offer, project inquiry, tech question) or is it spam/marketing/malware? Return ONLY the word 'TRUE' if valid, or 'FALSE' if spam. Message: ${message}` }]
+          }]
+        })
+      });
+
+      if (!aiRes.ok) {
+        throw new Error('Invalid Gemini API Key or rate limit exceeded. Please check your key.');
+      }
+
+      const aiData = await aiRes.json();
+      const aiDecision = aiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim()?.toUpperCase();
+
+      if (aiDecision === 'FALSE') {
+        throw new Error('AI Gatekeeper rejected this message as spam or irrelevant.');
+      }
+
+      // Step 2: Dispatch to secure backend
+      const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002').replace(/\/$/, '');
+      const res = await fetch(`${API_URL}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message, aiScreeningPassed: true }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message || 'Failed to send message');
+      }
       
-      toast.success('Your message has been securely sent! We will respond shortly.');
+      toast.success('Your message passed AI screening and was securely sent!');
       setName('');
       setEmail('');
       setMessage('');
+      setGeminiKey('');
+      setShowGuide(false);
       onClose();
-    } catch {
-      toast.error('Failed to dispatch support ticket. Please try again.');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to dispatch support ticket. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -99,6 +137,40 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
               rows={4}
             />
             {errors.message && <span style={styles.errorText}>{errors.message}</span>}
+          </div>
+
+          <div style={styles.gatekeeperCard}>
+            <div style={styles.gatekeeperHeader}>
+              <h4 style={styles.gatekeeperTitle}>🤖 AI Gatekeeper (BYOK)</h4>
+              <button 
+                type="button" 
+                onClick={() => setShowGuide(!showGuide)}
+                style={styles.guideToggle}
+              >
+                {showGuide ? 'Hide Guide' : 'How to get a free key?'}
+              </button>
+            </div>
+            
+            {showGuide && (
+              <div style={styles.guideSteps}>
+                <ol style={styles.guideList}>
+                  <li>Go to <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={styles.link}>Google AI Studio</a>.</li>
+                  <li>Sign in and click <strong>"Create API key"</strong>.</li>
+                  <li>Copy the key and paste it below. (It runs entirely in your browser and is never stored).</li>
+                </ol>
+              </div>
+            )}
+
+            <div style={styles.formGroup}>
+              <input
+                type="password"
+                value={geminiKey}
+                onChange={(e) => setGeminiKey(e.target.value)}
+                style={{ ...styles.input, ...(errors.geminiKey ? styles.inputError : {}) }}
+                placeholder="Paste your Gemini API Key..."
+              />
+              {errors.geminiKey && <span style={styles.errorText}>{errors.geminiKey}</span>}
+            </div>
           </div>
 
           <div style={styles.actions}>
@@ -247,5 +319,51 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'background-color 0.2s'
+  },
+  gatekeeperCard: {
+    background: 'rgba(108, 92, 231, 0.05)',
+    border: '1px solid rgba(108, 92, 231, 0.2)',
+    borderRadius: '8px',
+    padding: '16px',
+    marginTop: '4px'
+  },
+  gatekeeperHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '12px'
+  },
+  gatekeeperTitle: {
+    margin: 0,
+    fontSize: '13px',
+    fontWeight: '600',
+    color: '#6c5ce7'
+  },
+  guideToggle: {
+    background: 'none',
+    border: 'none',
+    color: '#a0aed0',
+    fontSize: '12px',
+    textDecoration: 'underline',
+    cursor: 'pointer',
+    padding: 0
+  },
+  guideSteps: {
+    background: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: '6px',
+    padding: '12px',
+    marginBottom: '12px'
+  },
+  guideList: {
+    margin: 0,
+    paddingLeft: '18px',
+    fontSize: '12px',
+    color: '#a0aed0',
+    lineHeight: '1.6'
+  },
+  link: {
+    color: '#6c5ce7',
+    textDecoration: 'none',
+    fontWeight: '500'
   }
 };

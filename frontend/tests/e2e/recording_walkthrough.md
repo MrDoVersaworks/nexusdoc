@@ -29,8 +29,12 @@ graph TD
 * **Mechanism:** Verifies key landing page copy `"Sovereign Intelligence"`, scrolls the page smoothly to demonstrate layout stability, and returns to the top.
 
 ### 2. Identity Registration
-* **Objective:** Establish the workspace owner credentials.
-* **Payload:** Generates unique `demo_${timestamp}_desktop@nexus.test` credentials.
+* **Objective:** Anchor a new tenant identity.
+* **Payload:** `demo_${timestamp}_desktop@nexus.test` with standard credentials.
+
+### 2b. Contact & Inbox Form Demo
+* **Objective:** Verify the public contact gateway and AI screening.
+* **Payload:** Submits a test inquiry with the Sovereign API key for BYOK-enabled AI screening.
 
 ### 3. Sidebar & Theme Transitions
 * **Objective:** Verify fluid layout reactivity and transition states.

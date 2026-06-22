@@ -1,7 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import { ErrorCode } from '../constants';
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
 import type { ApiErrorResponse } from '../types';
+
+export class AppError extends Error {
+  public statusCode: number;
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
 
 export function errorHandler(
   err: Error,

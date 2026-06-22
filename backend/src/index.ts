@@ -7,16 +7,23 @@ import { config } from './config';
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './utils/logger';
 import authRoutes from './routes/auth.routes';
-import documentRoutes from './routes/document.routes';
-import settingsRoutes from './routes/settings.routes';
-import statsRoutes from './routes/stats.routes';
+import documentRoutes from './routes/document.routes.js';
+import settingsRoutes from './routes/settings.routes.js';
+import publicRoutes from './routes/public.routes.js';
+import statsRoutes from './routes/stats.routes.js';
+import adminRoutes from './routes/admin.routes.js';
+import contactRoutes from './routes/contact.routes.js';
 
 const app = express();
 
 // ============================================================
 // SECURITY MIDDLEWARE
 // ============================================================
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // Let the Next.js frontend handle CSP for rendering
+  frameguard: { action: 'deny' }, // Prevent clickjacking
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }, // Strict Transport Security
+}));
 app.use(cors({
   origin: config.CORS_ORIGIN.includes(',')
     ? config.CORS_ORIGIN.split(',').map((o) => o.trim())
@@ -46,7 +53,10 @@ app.get('/health', (_req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/public', publicRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/contact', contactRoutes);
 
 // ============================================================
 // 404 HANDLER

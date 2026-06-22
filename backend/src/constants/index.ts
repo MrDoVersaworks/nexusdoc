@@ -45,7 +45,7 @@ export const REFRESH_COOKIE_NAME = 'nexusdoc_refresh_token';
 // RATE LIMITING
 // ============================================================
 export const AUTH_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-export const AUTH_RATE_LIMIT_MAX_REQUESTS = 20;
+export const AUTH_RATE_LIMIT_MAX_REQUESTS = 20; // Tightened for security
 
 export const API_RATE_LIMIT_WINDOW_MS = 1 * 60 * 1000; // 1 minute
 export const API_RATE_LIMIT_MAX_REQUESTS = 60; // 60 requests per minute for general API

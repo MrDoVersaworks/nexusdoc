@@ -19,7 +19,7 @@ export default function GuidePage() {
             <ul className={styles.list}>
               <li>When you upload a document, the system breaks it down into hundreds of small chunks.</li>
               <li>It sends these chunks to the Google Gemini Embedding Model.</li>
-              <li>The AI doesn't just read words; it converts the <em>meaning</em> of the sentence into a mathematical coordinate (a vector in 768-dimensional space).</li>
+              <li>The AI doesn&apos;t just read words; it converts the <em>meaning</em> of the sentence into a mathematical coordinate (a vector in 768-dimensional space).</li>
               <li>When you search a question (e.g., <em>"What causes crime?"</em>), your question is also converted into a coordinate. The database physically measures the distance between your question and every chunk to return the closest mathematical match!</li>
             </ul>
           </div>

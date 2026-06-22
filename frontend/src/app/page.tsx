@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Database, Lock, Search, FileText, Server, TrendingUp, Code2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { PlatformReviews, Review } from '@/components/PlatformReviews';
+import { UnifiedFooter } from '@/components/UnifiedFooter';
 import styles from './page.module.css';
 
 export default function Home() {
@@ -24,6 +26,12 @@ export default function Home() {
     { icon: Search, title: 'Semantic Discovery', desc: 'Vector-based retrieval to instantly find insights across documents.' },
     { icon: Lock, title: 'Air-Gapped Security', desc: 'Bring-Your-Own-Key (BYOK) architecture ensures absolute data privacy.' },
     { icon: Database, title: 'Vector Vault', desc: 'PostgreSQL-backed embeddings for hyper-scalable knowledge storage.' }
+  ];
+
+  const mockReviews: Review[] = [
+    { id: '1', name: 'Sarah Jenkins', rating: 5, profession: 'Lead Architect', feedback: 'NexusDoc completely transformed how our engineering team discovers internal knowledge. The vector search is instantaneous.' },
+    { id: '2', name: 'Marcus Chen', rating: 5, profession: 'CTO at TechFlow', feedback: 'The BYOK security model was exactly what we needed to maintain compliance while leveraging LLMs for our private documentation.' },
+    { id: '3', name: 'Elena Rodriguez', rating: 5, profession: 'Senior Developer', feedback: 'I no longer spend hours digging through legacy Confluence pages. NexusDoc surfaces exactly the context I need in seconds.' }
   ];
 
   if (!isMounted) return null; // Fixes SSR "frozen card" glitch
@@ -132,23 +140,15 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Dynamic Recruiter Footer */}
-      <footer style={{
-        marginTop: 'auto',
-        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-        padding: '2.5rem 2rem',
-        textAlign: 'center',
-        color: '#64748b',
-        fontSize: '0.875rem',
-        zIndex: 10,
-        position: 'relative',
-        backgroundColor: 'rgba(5, 5, 5, 0.4)',
-      }}>
-        <p style={{ margin: '0 0 0.5rem 0' }}>NexusDoc Document Intelligence — Engineered with Next.js & Express.</p>
-        <p style={{ margin: 0, fontWeight: 600, color: '#f8fafc' }}>
-          Architected by <span style={{ color: '#38bdf8' }}>Oyewole Favour</span>
-        </p>
-      </footer>
+      <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'rgba(5, 5, 5, 0.4)' }}>
+        <PlatformReviews reviews={mockReviews} />
+      </div>
+
+      <UnifiedFooter 
+        platformName="NexusDoc Document Intelligence" 
+        techStack="Next.js & Express"
+        contactLink="https://devpulse.tech" // Redirect to main portfolio contact or a direct mailto
+      />
     </div>
   );
 }

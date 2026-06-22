@@ -11,8 +11,9 @@ import {
   listDocuments,
   getDocument,
   deleteDocument,
-} from '../services/document.service';
-import { semanticSearch } from '../services/search.service';
+} from '../services/document.service.js';
+import { semanticSearch } from '../services/search.service.js';
+import { cacheMiddleware, invalidateCache } from '../utils/cache.js';
 
 const router = Router();
 
@@ -27,7 +28,7 @@ router.use(authMiddleware);
 router.use(apiRateLimiter);
 
 // GET /api/documents
-router.get('/', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.get('/', cacheMiddleware(60), asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const userId = req.userId!;
   const parsed = paginationSchema.parse(req.query);
 
@@ -65,6 +66,8 @@ router.post(
 
     const document = await uploadDocument({ userId, title, file: req.file });
 
+    invalidateCache('/api/documents', userId);
+
     res.status(201).json({
       success: true,
       data: document,
@@ -90,7 +93,7 @@ router.post(
 );
 
 // GET /api/documents/:id
-router.get('/:id', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.get('/:id', cacheMiddleware(60), asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const userId = req.userId!;
   const documentId = req.params.id;
 
@@ -108,6 +111,8 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
   const documentId = req.params.id;
 
   await deleteDocument(userId, documentId);
+
+  invalidateCache('/api/documents', userId);
 
   res.status(200).json({
     success: true,

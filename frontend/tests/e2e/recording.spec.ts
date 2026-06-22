@@ -62,6 +62,22 @@ for (const vp of viewports) {
       await expect(page.getByText(/Sovereign Intelligence/i)).toBeVisible();
       await autoScroll(page, vp.name);
 
+      // 1b. CONTACT DEMO
+      console.log(`[SOVEREIGN] ${vp.name}: Contact Demo...`);
+      const contactBtn = page.locator('button:has-text("Contact"), a:has-text("Contact")').first();
+      if (await contactBtn.isVisible()) {
+          await contactBtn.click();
+          await page.waitForTimeout(1000);
+          await page.locator('input[type="text"]').first().fill(`Observer (${vp.name})`);
+          await page.locator('input[type="email"]').first().fill(email);
+          await page.locator('textarea').first().fill('Interested in Sovereign architecture. Please reach out.');
+          const keyInput = page.locator('input[type="password"]');
+          if (await keyInput.isVisible()) await keyInput.fill(SYSTEM_API_KEY);
+          await page.waitForTimeout(1000);
+          await page.locator('form').getByRole('button', { name: /Send/i }).click();
+          await page.waitForTimeout(3000);
+      }
+
       // 2. REGISTRATION
       console.log(`[SOVEREIGN] ${vp.name}: Registering New Identity...`);
       await page.goto('http://localhost:3001/register');
@@ -213,6 +229,25 @@ for (const vp of viewports) {
 
       console.log(`[SOVEREIGN] ${vp.name}: Performing Final Security Cleanup...`);
       await page.waitForURL('**/dashboard');
+      
+      console.log(`[SOVEREIGN] ${vp.name}: Checking Admin Inbox...`);
+      await page.goto('http://localhost:3001/admin/inbox');
+      await page.waitForTimeout(3000);
+      await autoScroll(page, vp.name);
+      const markReadBtn = page.locator('button[title="Mark as read"], button:has-text("Mark Read")').first();
+      if (await markReadBtn.isVisible()) {
+          await markReadBtn.click();
+          await page.waitForTimeout(2000);
+      }
+      const purgeMsgBtn = page.locator('button[title="Purge Message"], button:has-text("Purge")').first();
+      if (await purgeMsgBtn.isVisible()) {
+          page.once('dialog', async dialog => dialog.accept());
+          await purgeMsgBtn.click();
+          await page.waitForTimeout(2000);
+      }
+      await page.goto('http://localhost:3001/dashboard');
+      await page.waitForTimeout(2000);
+
       if (await menuBtn.isVisible()) { await menuBtn.click(); await page.waitForTimeout(1000); }
       await page.getByRole('link', { name: /Settings/i }).first().click();
       await page.waitForTimeout(3000);
