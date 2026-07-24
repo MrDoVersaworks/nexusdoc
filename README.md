@@ -119,10 +119,6 @@ To witness the platform demonstrate itself across Desktop, Tablet, and Mobile vi
 cd frontend
 npx playwright test tests/e2e/recording.spec.ts --project=chromium --workers=1 --headed
 ```
-*Note: The script is intentionally slowed down (deliberate execution) to allow for visual inspection of transitions and AI logic.*
-
-📖 **[E2E Recording Walkthrough](./frontend/tests/e2e/recording_walkthrough.md):** Read the comprehensive, human-readable breakdown of every stage of the automated demo sequence.
-
 ---
 
 ## 🛡️ Engineering Principles
@@ -176,9 +172,6 @@ If you wish to see the system test itself across every feature (Upload, Summary,
    - **Desktop Perspective:** The browser opens and registers a demo account.
    - **Manual Pause:** The script pauses for 30 seconds at each stage to allow you to initiate a screen recorder (like *Cursorful*).
    - **Exhaustive Testing:** The robot physically uploads a document, waits for AI embeddings, performs a semantic search, and cleans up.
-
-### 3. The Technical Walkthrough (Video)
-View the [Full System Recording](https://github.com/MrDoVersaworks/nexusdoc/blob/main/videos/full_walkthrough.mp4) for a narrated deep-dive into the architectural decisions and security layers.
 
 ---
 
