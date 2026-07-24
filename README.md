@@ -28,22 +28,15 @@ NexusDoc is designed for the modern "Knowledge Professional" who manages high vo
 - **Adaptive Responsive Design:** A "True Responsive" UI that restructures itself across Mobile, Tablet, and Desktop viewports.
 - **DevOps Integrated:** Automated CI/CD pipelines with Playwright E2E testing for automated layout verification.
 
-## 📸 Visual Overview
+## 📸 Interface & User Experience
 
-| **Desktop Intelligence** | **Mobile Adaptation** |
+| Landing Page | Authentication Portal |
 |:---:|:---:|
-| ![Landing Hero](frontend/public/screenshots/landing_hero.png) | ![Mobile View](frontend/public/screenshots/mobile_adaptive_view.png) |
-| *High-Conversion Hero Section* | *Adaptive Layout Law in Action* |
+| ![Landing Page](./frontend/public/screenshots/landing.png) | ![Login Screen](./frontend/public/screenshots/login.png) |
 
-| **AI Vault & Security** | **Semantic Intelligence** |
-|:---:|:---:|
-| ![AI Settings](frontend/public/screenshots/ai_vault_settings.png) | ![Document Detail](frontend/public/screenshots/document_detail.png) |
-| *AES-256-GCM Encrypted API Vault* | *Rich-Text Summaries with Copy/Download* |
-
-| **Natural Language Search** | **System Architecture Guide** |
-|:---:|:---:|
-| ![Semantic Search](frontend/public/screenshots/semantic_search.png) | ![System Guide](frontend/public/screenshots/system_guide.png) |
-| *Semantic Search across Documents* | *Deep-Dive Engineering Documentation* |
+| Account Registration |
+|:---:|
+| ![Register Screen](./frontend/public/screenshots/register.png) |
 
 ---
 
