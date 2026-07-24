@@ -40,12 +40,6 @@ NexusDoc is designed for the modern "Knowledge Professional" who manages high vo
 
 ---
 
-## 🎬 Sovereign Inception: Full System Walkthrough
-
-[![NexusDoc Full Demo](https://github.com/MrDoVersaworks/nexusdoc/blob/main/videos/full_walkthrough.mp4)](https://github.com/MrDoVersaworks/nexusdoc/blob/main/videos/full_walkthrough.mp4)
-
-*A continuous technical walkthrough of the NexusDoc ecosystem: From secure document ingestion and AI summarization to semantic retrieval and total data erasure.*
-
 ---
 
 ## 🧩 The Engineering Challenge
