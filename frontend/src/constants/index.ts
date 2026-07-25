@@ -1,7 +1,7 @@
 // ============================================================
 // API BASE URL
 // ============================================================
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '');
 
 // Dynamically resolve API URL for local network access (e.g. from mobile)
 export const API_BASE_URL = typeof window !== 'undefined' 
