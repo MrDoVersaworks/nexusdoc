@@ -97,7 +97,7 @@ export function PlatformReviews({ reviews = [] }: { reviews?: Review[] }) {
       >
         {submitted ? (
           <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4', display: 'flex', items: 'center', justifyContent: 'center', margin: '0 auto 1rem auto', fontSize: '1.5rem', fontWeight: 'bold' }}>✓</div>
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto', fontSize: '1.5rem', fontWeight: 'bold' }}>✓</div>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>Feedback Transmitted</h3>
             <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Thank you for sharing your experience with NexusDoc.</p>
           </div>
