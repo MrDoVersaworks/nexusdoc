@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import { AUTH_RATE_LIMIT_WINDOW_MS, AUTH_RATE_LIMIT_MAX_REQUESTS, API_RATE_LIMIT_WINDOW_MS, API_RATE_LIMIT_MAX_REQUESTS, ErrorCode } from '../constants';
 import type { ApiErrorResponse } from '../types';
 
