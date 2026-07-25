@@ -147,7 +147,7 @@ export default function Home() {
       <UnifiedFooter 
         platformName="NexusDoc Document Intelligence" 
         techStack="Next.js & Express"
-        contactLink="https://devpulse.tech" // Redirect to main portfolio contact or a direct mailto
+        contactLink="https://devpulse-igt5.vercel.app"
       />
     </div>
   );
