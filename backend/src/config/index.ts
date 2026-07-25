@@ -4,11 +4,12 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   JWT_ACCESS_SECRET: z.string().min(1, 'JWT_ACCESS_SECRET is required'),
   JWT_REFRESH_SECRET: z.string().min(1, 'JWT_REFRESH_SECRET is required'),
-  AES_ENCRYPTION_KEY: z.string().length(64, 'AES_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes)'),
+  AES_ENCRYPTION_KEY: z.string().min(1, 'AES_ENCRYPTION_KEY is required'),
   BLOB_READ_WRITE_TOKEN: z.string().optional(),
   PORT: z.string().default('4000'),
   NODE_ENV: z.enum(['development', 'production']).default('development'),
   CORS_ORIGIN: z.string().min(1, 'CORS_ORIGIN is required'),
+  GEMINI_API_KEY: z.string().optional(),
 });
 
 type EnvConfig = z.infer<typeof envSchema>;
