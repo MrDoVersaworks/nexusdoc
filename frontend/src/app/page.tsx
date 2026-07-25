@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, Database, Lock, Search, FileText, Server, TrendingUp, Code2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-
+import { PlatformReviews } from '@/components/PlatformReviews';
 import { UnifiedFooter } from '@/components/UnifiedFooter';
 import styles from './page.module.css';
 
@@ -135,7 +135,9 @@ export default function Home() {
         </div>
       </div>
 
-
+      <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'rgba(5, 5, 5, 0.4)' }}>
+        <PlatformReviews />
+      </div>
 
       <UnifiedFooter 
         platformName="NexusDoc Document Intelligence" 
