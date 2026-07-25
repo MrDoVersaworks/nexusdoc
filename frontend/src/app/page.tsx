@@ -141,13 +141,13 @@ export default function Home() {
       </div>
 
       <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'rgba(5, 5, 5, 0.4)' }}>
-        <PlatformReviews reviews={mockReviews} />
+        <PlatformReviews />
       </div>
 
       <UnifiedFooter 
         platformName="NexusDoc Document Intelligence" 
         techStack="Next.js & Express"
-        contactLink="https://devpulse-igt5.vercel.app"
+        contactLink="https://devpulse-zeta-six.vercel.app/"
       />
     </div>
   );
