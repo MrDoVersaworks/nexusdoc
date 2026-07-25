@@ -24,10 +24,15 @@ app.use((helmet as any)({
   frameguard: { action: 'deny' }, // Prevent clickjacking
   hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }, // Strict Transport Security
 }));
+let corsOrigin: string | string[];
+if (config.CORS_ORIGIN.includes(',')) {
+  corsOrigin = config.CORS_ORIGIN.split(',').map((origin) => origin.trim().replace(/\/+$/, ''));
+} else {
+  corsOrigin = config.CORS_ORIGIN.trim().replace(/\/+$/, '');
+}
+
 app.use(cors({
-  origin: config.CORS_ORIGIN.includes(',')
-    ? config.CORS_ORIGIN.split(',').map((o) => o.trim())
-    : config.CORS_ORIGIN,
+  origin: corsOrigin,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
