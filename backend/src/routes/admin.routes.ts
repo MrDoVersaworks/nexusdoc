@@ -1,6 +1,6 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { db } from '../db/connection.js';
-import { contactMessages, systemSettings } from '../db/schema.js';
+import { contactMessages, systemSettings, platformReviews } from '../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
@@ -69,6 +69,31 @@ router.delete('/inbox/:id', async (req: Request, res: Response, next: NextFuncti
 
     res.status(200).json({
       success: true,
+      data: null,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// DELETE /api/admin/reviews/:id - Delete public review from database
+router.delete('/reviews/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const [deleted] = await db
+      .delete(platformReviews)
+      .where(eq(platformReviews.id, id as any))
+      .returning();
+
+    if (!deleted) {
+      next(new AppError('Review not found', 404));
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Review deleted successfully from database.',
       data: null,
     });
   } catch (error) {
