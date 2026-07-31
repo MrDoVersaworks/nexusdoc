@@ -10,6 +10,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production']).default('development'),
   CORS_ORIGIN: z.string().min(1, 'CORS_ORIGIN is required'),
   GEMINI_API_KEY: z.string().optional(),
+  ADMIN_EMAIL: z.string().email().optional(),
 });
 
 type EnvConfig = z.infer<typeof envSchema>;

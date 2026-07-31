@@ -108,6 +108,8 @@ export const systemSettings = pgTable('system_settings', {
   id: uuid('id').defaultRandom().primaryKey(),
   google_analytics_id: varchar('google_analytics_id', { length: 50 }),
   termly_uuid: varchar('termly_uuid', { length: 50 }),
+  privacy_policy_content: text('privacy_policy_content'),
+  terms_of_service_content: text('terms_of_service_content'),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

@@ -3,12 +3,14 @@ import { db } from '../db/connection.js';
 import { contactMessages, systemSettings, platformReviews } from '../db/schema.js';
 import { eq, desc } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.js';
+import { ownerMiddleware } from '../middleware/owner.js';
 import { AppError } from '../middleware/errorHandler.js';
 
 const router = Router();
 
 // Protect all admin routes
 router.use(authMiddleware);
+router.use(ownerMiddleware);
 
 // GET /api/admin/inbox - Retrieve all messages
 router.get('/inbox', async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -139,4 +141,3 @@ router.put('/settings', async (req: Request, res: Response, next: NextFunction):
 });
 
 export default router;
-
