@@ -4,7 +4,7 @@
 [![Playwright E2E](https://img.shields.io/badge/QA-Playwright-green)](https://playwright.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**NexusDoc** is a production-grade Document Intelligence platform that leverages the Gemini AI engine to provide semantic search, automated summarization, and vector-based extraction for PDFs and text files. It is built with a "Security-First" and "QA-First" philosophy, designed to demonstrate senior-level full-stack and AI engineering competence.
+**NexusDoc** is a Document Intelligence platform currently **under active development** that leverages the Gemini AI engine to provide semantic search, automated summarization, and vector-based extraction for PDFs and text files. It is built with a "Security-First" and "QA-First" philosophy, designed to demonstrate senior-level full-stack and AI engineering competence.
 
 ## 🎯 Why NexusDoc?
 In a world of subscription-based AI services, NexusDoc stands out as a **Sovereign Intelligence Vault.** 
@@ -237,4 +237,4 @@ NexusDoc is part of a high-innovation portfolio series.
 ---
 
 > [!NOTE]
-> This project is stabilized, production-ready, and optimized for high-performance AI document handling.
+> This project is under active development and is being continuously improved.
