@@ -14,20 +14,22 @@ import {
 const router = Router();
 
 function refreshCookieOptions() {
+  const sameSite: 'none' | 'lax' = config.NODE_ENV === 'production' ? 'none' : 'lax';
   return {
     httpOnly: true,
     secure: config.NODE_ENV === 'production',
-    sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax',
+    sameSite,
     maxAge: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
     path: '/',
   };
 }
 
 function clearRefreshCookie(res: Response): void {
+  const sameSite: 'none' | 'lax' = config.NODE_ENV === 'production' ? 'none' : 'lax';
   res.clearCookie(REFRESH_COOKIE_NAME, {
     httpOnly: true,
     secure: config.NODE_ENV === 'production',
-    sameSite: (config.NODE_ENV === 'production' ? 'none' : 'lax') as const,
+    sameSite,
     path: '/',
   });
 }
