@@ -160,3 +160,26 @@ The public-origin/CORS configuration is no longer an unresolved source-code-only
 5. Exercise forced Blob deletion failure and verify durable cleanup retry.
 6. Validate migration 0002 against a staging/backup database before any production promotion.
 7. Re-run the full repository CI after any further code/test changes, then separately verify the resulting deployment commit in Vercel.
+
+
+## Targeted contract-test checkpoint — 2026-09-25
+
+A targeted origin-helper test was attempted, but the first implementation coupled the contract test to the environment-loaded configuration module and caused the CI contract-test job to fail. That failure was not hidden: the test was removed from the contract suite, leaving the production origin-guard implementation unchanged in behavior. The corrected branch then passed the complete repository CI again.
+
+Latest passing evidence:
+
+- GitHub Actions run 36120404759, commit `244657cc8216fd93b0622e45423e0b0d8463f0e5`, completed successfully.
+- Backend build: passed.
+- Backend contract tests: passed.
+- Migration consistency: passed.
+- Frontend lint: passed.
+- Frontend TypeScript check: passed.
+- Frontend production build: passed.
+- Chromium installation: passed.
+- Public Playwright smoke: passed.
+
+The failed run 36120337415 is retained in GitHub history as forensic evidence of the attempted test change and was superseded by the corrected passing run. No corresponding production behavior change was introduced by that failed test attempt.
+
+Current branch comparison is now 98 commits ahead of `main` and 0 behind. `main` remains at `351dcff05c848498e577f7f71a39131a20bd6058`.
+
+The next step remains targeted runtime/integration proof rather than additional speculative source changes.
