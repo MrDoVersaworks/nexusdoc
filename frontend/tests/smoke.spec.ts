@@ -18,6 +18,7 @@ test.describe('NexusDoc public smoke', () => {
     await page.goto('/login', { waitUntil: 'domcontentloaded' });
     const loginPassword = page.locator('#login-password');
     const loginToggle = page.getByRole('button', { name: 'Show password' });
+    await expect(loginToggle).toBeEnabled();
     await expect(loginPassword).toHaveAttribute('type', 'password');
     await loginToggle.click();
     await expect(loginPassword).toHaveAttribute('type', 'text');
