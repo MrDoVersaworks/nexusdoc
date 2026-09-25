@@ -266,3 +266,24 @@ Before promotion, the most recent preview build failure was separately inspected
 Because the current Vercel status is rate-limited, the existence of the production deployment of merge commit `9bf0989ed079addf715dd1c686c5499a4df92f16` has not been claimed. The last known production deployment remains the original main deployment until Vercel successfully builds and promotes the merged commit.
 
 No rollback was performed. The original production commit remains independently preserved and directly comparable through `pre-remediation-main-2026-09-25`.
+
+
+## Production database migration automation checkpoint — 2026-09-25
+
+A deployment-integrity gap was identified: the repository contained the real Drizzle migration runner (npm run db:migrate) and CI validated migration consistency, but the Vercel production deployment path did not execute the migration runner. Therefore there was no repository-level evidence that the production database had received migration 0002_forensic_remediation.sql.
+
+The deployment path was corrected on branch deployment-production-migrations:
+
+- Replaced the legacy Vercel builds configuration, which caused Vercel Project Build/Development Settings and buildCommand to be ignored, with Vercel's current Express framework configuration.
+- Added a Vercel buildCommand that executes npm run db:migrate only when VERCEL_ENV=production.
+- Preview deployments explicitly skip production migrations so a preview cannot accidentally mutate the production database.
+- The production command uses Vercel's existing Production DATABASE_URL environment variable inside the Vercel build environment; the database credential is not copied into GitHub Actions.
+- Because the migration command exits non-zero on failure, a failed production migration fails the Vercel build rather than silently publishing the deployment.
+- The existing committed SQL migration files remain the source of truth. Production does not run drizzle-kit generate; generation belongs to the schema-change/development workflow and the generated migration is committed before deployment. Production applies the committed migrations with npm run db:migrate.
+- The migration consistency check was extended to assert that the Vercel configuration contains the production migration command and no longer contains the legacy builds property that bypassed buildCommand.
+
+This implements the intended sequence:
+
+schema change -> generate/review/commit migration -> CI validates migration -> Vercel production build runs npm run db:migrate with production DATABASE_URL -> application deployment proceeds only if migration succeeds.
+
+Production database application is still UNPROVEN until the rate-limited Vercel deployment can execute successfully. No claim is made that the production database has already been migrated.
