@@ -13,6 +13,7 @@ import publicRoutes from './routes/public.routes.js';
 import statsRoutes from './routes/stats.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import contactRoutes from './routes/contact.routes.js';
+import storageCleanupRoutes from './routes/storage-cleanup.routes.js';
 
 const app = express();
 
