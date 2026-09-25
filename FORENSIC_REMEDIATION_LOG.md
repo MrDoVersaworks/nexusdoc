@@ -94,3 +94,39 @@ Repository-level CI does not prove live integrations that require production cre
 - Vercel Cron invocation of /api/internal/storage-cleanup with CRON_SECRET.
 
 No code on main was modified during this pass.
+
+
+## Session checkpoint — 2026-09-25
+
+This checkpoint was written during the active forensic pass after the branch had already accumulated the remediation commits above. The work did not pause because of an execution hang; the sequence was deliberately being advanced through contract/infrastructure review before further code changes.
+
+Additional changes inspected/applied in this checkpoint:
+
+- Authentication state: refresh-token rotation was tightened so the database update is conditional on the currently stored token hash, making replay races fail closed instead of allowing two successful rotations.
+- Authentication transport: a dedicated origin guard was added to cookie-authenticated state-changing routes; production cookie attributes remain explicit and cross-site requests are rejected at the application boundary.
+- Authorization: admin/owner authorization was changed to resolve administrative capability from the persisted users.is_admin field rather than public email identity or an untrusted client assertion.
+- Admin API: inbox responses were normalized into an explicit DTO; the canonical PATCH /api/admin/inbox/:id contract was added while retaining a compatibility alias for the previous read endpoint. Review moderation endpoints were made explicit.
+- Public review contract: submissions are schema-validated, rate-limited, persisted as pending, and public reads return only approved reviews. This preserves the prior public-review feature while changing publication to a moderated state machine.
+- Document boundary: document list/detail responses no longer expose the storage URL as a client capability; downloads are authenticated, ownership-scoped, streamed from private Blob storage, and marked private, no-store.
+- Upload/storage compensation: uploaded blobs are private; upload compensation and document deletion failures are recorded in durable storage_cleanup_tasks so cleanup can be retried rather than silently lost.
+- Upload validation: filename path components are normalized before persistence, extension/MIME checks are paired with content checks for PDFs/text, and route IDs use the UUID validation contract.
+- Database contract: migration 0002_forensic_remediation.sql was added with an explicit case-insensitive email-collision guard. It deliberately aborts rather than silently merging ambiguous identities.
+- Error/validation contracts: typed application errors are preserved by the global error handler and route-boundary validation is applied consistently to body/query/params.
+- Documentation status: the remediation log itself is treated as a deliverable. Every material change must record original behavior, intended change, preservation requirement, proof, failures/uncertainty, and final disposition before the pass is considered complete.
+
+### Current branch state at checkpoint
+
+`audit-remediation` is 93 commits ahead of `main` and 0 behind, with `main` still at `351dcff05c848498e577f7f71a39131a20bd6058`. This confirms that remediation work exists in the history even though the two refs originally shared the same tip.
+
+### Test status at checkpoint
+
+The repository-level CI evidence recorded above remains the latest verified full-suite evidence available in this log. The newly changed authentication/storage/public-review paths still require the targeted runtime/integration tests listed under deployment-only checks before these findings can be marked fully closed. No successful build or live integration result is being inferred merely from source edits.
+
+### Next forensic sequence
+
+1. Reconcile the public-origin/CORS configuration with the actual deployment topology rather than treating CORS and cookie settings independently.
+2. Verify every caller of the changed auth, admin, document, review, and cleanup contracts.
+3. Run targeted tests for replay, origin enforcement, ownership isolation, moderation state transitions, private blob access, and cleanup compensation.
+4. Run the complete backend/frontend build, migration checks, and browser smoke suite again after the targeted fixes.
+5. Inspect Vercel deployment configuration and, where credentials/connection permit, validate the deployed runtime behavior separately from repository CI.
+6. Only then close findings and record residual uncertainty.
