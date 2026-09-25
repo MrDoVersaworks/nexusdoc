@@ -210,3 +210,15 @@ The connected Vercel account was queried after the UI polish commits. The existi
 This is treated as an infrastructure visibility/deployment limitation, not as evidence that the new UI failed. The repository's complete frontend CI pipeline passed on that exact commit, including production build and public Playwright smoke. The connected Vercel account also has the prior remediation preview available and previously verified as READY.
 
 An attempted direct Vercel deployment was intentionally not forced because the available deployment API requires a complete file payload; sending a partial file set would create an invalid/incomplete deployment and would violate the requirement not to change functionality merely to work around tooling. No production deployment or main-branch mutation was performed.
+
+
+## Vercel preview verification checkpoint — 2026-09-25
+
+The frontend presentation polish completed the full GitHub CI suite successfully at commit `d63eacb6064b9875a7c6036c8d379b4267767433`:
+
+- Backend build, contract tests, and migration consistency: passed.
+- Frontend lint, TypeScript, production build, Chromium installation, and public Playwright smoke: passed.
+
+Vercel project inspection was also continued through the connected account. No unresolved Vercel Toolbar threads were present for the NexusDoc backend project on `audit-remediation`. The deployment-access tooling is available for protected previews, so protected-preview access is treated as an operational access concern rather than a reason to weaken application security.
+
+The visual pass remains presentation-only. The remediation branch still does not modify `main`.
