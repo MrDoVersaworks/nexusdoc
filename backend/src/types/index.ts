@@ -94,6 +94,12 @@ export const paginationSchema = z.object({
 export const uuidParamSchema = z.object({
   id: z.string().uuid('must be a valid UUID'),
 });
+export const publicReviewSchema = z.object({
+  name: z.string().trim().min(1).max(255),
+  profession: z.string().trim().max(255).optional(),
+  rating: z.coerce.number().int().min(1).max(5),
+  feedback: z.string().trim().min(1).max(2000),
+});
 
 declare global {
   namespace Express {
