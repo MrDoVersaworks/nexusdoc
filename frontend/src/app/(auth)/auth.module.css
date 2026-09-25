@@ -3,7 +3,8 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 24px;
+  min-height: 100dvh;
+  padding: 24px 16px;
   background: var(--bg-primary);
 }
 
@@ -16,7 +17,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-xl);
-  padding: 32px;
+  padding: 28px 24px;
   box-shadow: var(--shadow-lg);
   animation: fadeIn var(--transition-slow) ease forwards;
 }
@@ -29,27 +30,50 @@
 .authFormGroup { display: flex; flex-direction: column; }
 .authFormGroup input { padding: 12px 14px; font-size: var(--font-base); }
 
-.passwordField { position: relative; }
-.passwordField input { width: 100%; padding-right: 46px; }
+.passwordField {
+  position: relative;
+  width: 100%;
+}
+
+.passwordField input {
+  width: 100%;
+  padding-right: 58px;
+}
+
 .passwordToggle {
   position: absolute;
   top: 50%;
-  right: 10px;
+  right: 8px;
+  z-index: 1;
+  width: 42px;
+  height: 42px;
   transform: translateY(-50%);
-  width: 34px;
-  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
-  transition: color var(--transition-fast), background var(--transition-fast);
+  transition: color var(--transition-fast), background-color var(--transition-fast);
 }
-.passwordToggle:hover { color: var(--text-primary); background: var(--bg-tertiary); }
-.passwordToggle:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+
+.passwordToggle:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.passwordToggle:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+
+.passwordToggle:disabled {
+  opacity: 0;
+  cursor: default;
+  pointer-events: none;
+}
 
 .termsBox {
   padding: 14px;
@@ -81,4 +105,18 @@
   font-size: var(--font-sm);
   text-align: center;
 }
-@media (min-width: 768px) { .authCard { padding: 40px; } }
+
+@media (min-width: 480px) {
+  .authPage { padding: 32px 20px; }
+  .authCard { padding: 32px; }
+}
+
+@media (min-width: 768px) {
+  .authCard { padding: 40px; }
+}
+
+@media (max-width: 360px) {
+  .authPage { padding: 16px 12px; }
+  .authCard { padding: 24px 18px; }
+  .authLogo { margin-bottom: 24px; }
+}
