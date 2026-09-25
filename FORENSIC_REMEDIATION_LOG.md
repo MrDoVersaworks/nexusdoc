@@ -201,3 +201,12 @@ Design intent:
 Files changed are presentation-only: global design tokens, landing-page styles, auth styles, dashboard overview styles, public review presentation, contact modal presentation, and footer presentation.
 
 Proof requirement remains the same as every other remediation: the full frontend lint/typecheck/build and Playwright smoke suite must pass after the visual changes. Vercel preview deployment must also be inspected before this checkpoint is closed.
+
+
+### Vercel UI verification checkpoint — 2026-09-25
+
+The connected Vercel account was queried after the UI polish commits. The existing NexusDoc frontend preview deployments remain READY, but the Vercel deployment list did not expose a deployment for the latest UI-polish commit d63eacb6064b9875a7c6036c8d379b4267767433 during this verification window.
+
+This is treated as an infrastructure visibility/deployment limitation, not as evidence that the new UI failed. The repository's complete frontend CI pipeline passed on that exact commit, including production build and public Playwright smoke. The connected Vercel account also has the prior remediation preview available and previously verified as READY.
+
+An attempted direct Vercel deployment was intentionally not forced because the available deployment API requires a complete file payload; sending a partial file set would create an invalid/incomplete deployment and would violate the requirement not to change functionality merely to work around tooling. No production deployment or main-branch mutation was performed.
