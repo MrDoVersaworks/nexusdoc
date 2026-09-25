@@ -91,3 +91,15 @@ export enum ErrorCode {
   NOT_FOUND = 'ERR_NOT_FOUND',
   RATE_LIMITED = 'ERR_RATE_LIMITED',
 }
+
+
+export const CLIENT_ERROR_MESSAGES: Record<string, { statusCode: number; message: string }> = {
+  [ErrorCode.AI_NO_API_KEY]: { statusCode: 422, message: 'AI processing is not configured for this account. Add your Gemini API key in Settings and try again.' },
+  [ErrorCode.AI_NO_MODEL]: { statusCode: 422, message: 'AI processing is not configured for this account. Choose a Gemini generation and embedding model in Settings and try again.' },
+  [ErrorCode.AI_QUOTA_EXCEEDED]: { statusCode: 429, message: 'Your Gemini AI service has reached its usage limit. Check your API quota or billing settings, then try again.' },
+  [ErrorCode.AI_AUTH_FAILED]: { statusCode: 422, message: 'Your Gemini API key was rejected. Check or replace the API key in Settings, then try again.' },
+  [ErrorCode.AI_PROVIDER_UNAVAILABLE]: { statusCode: 503, message: 'The Gemini AI service is temporarily unavailable. Your document was not completed. Please try again shortly.' },
+  [ErrorCode.AI_SUMMARIZATION_FAILED]: { statusCode: 502, message: 'AI summarization could not be completed. Check your Gemini configuration and try again.' },
+  [ErrorCode.AI_EMBEDDING_FAILED]: { statusCode: 502, message: 'AI document indexing could not be completed. Check your Gemini configuration and try again.' },
+  [ErrorCode.AI_PROCESSING_FAILED]: { statusCode: 502, message: 'AI processing could not be completed. Check your Gemini configuration and try again.' },
+};
