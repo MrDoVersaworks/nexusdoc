@@ -5,6 +5,11 @@ import './globals.css';
 import Script from 'next/script';
 import { API_BASE_URL } from '@/constants';
 
+interface PublicSettings {
+  google_analytics_id: string | null;
+  termly_uuid: string | null;
+}
+
 import { ThemeProvider } from '@/contexts/ThemeContext';
 
 export const metadata: Metadata = {
@@ -25,14 +30,14 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
 
-  let settings: any = null;
+  let settings: PublicSettings | null = null;
   try {
     const res = await fetch(`${API_BASE_URL}/api/public/settings`, { next: { revalidate: 60 } });
     if (res.ok) {
       const json = await res.json();
       settings = json.data;
     }
-  } catch (e) {
+  } catch {
     console.warn('Failed to fetch global settings for scripts');
   }
 
@@ -40,12 +45,12 @@ export default async function RootLayout({
     <html lang="en" data-theme="dark" suppressHydrationWarning={true}>
       <head>
         {settings?.termly_uuid && (
-          <script
-            type="text/javascript"
+          <Script
             src="https://app.termly.io/embed.min.js"
+            strategy="afterInteractive"
             data-auto-block="on"
             data-website-uuid={settings.termly_uuid}
-          ></script>
+          />
         )}
         {settings?.google_analytics_id && (
           <>
@@ -71,7 +76,7 @@ export default async function RootLayout({
                 } else {
                   document.documentElement.style.backgroundColor = '#f8fafc';
                 }
-              } catch (e) { console.error('Theme hydration failed:', e); }
+              } catch { /* theme preference is optional */ }
             `,
           }}
         />
