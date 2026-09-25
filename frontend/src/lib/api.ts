@@ -10,7 +10,7 @@ export function getAccessToken(): string | null { return accessToken; }
 interface RequestOptions {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   path: string;
-  body?: Record<string, unknown> | FormData;
+  body?: object | FormData;
   requiresAuth?: boolean;
 }
 
