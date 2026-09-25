@@ -1,5 +1,5 @@
 import { rateLimit } from 'express-rate-limit';
-import { AUTH_RATE_LIMIT_WINDOW_MS, AUTH_RATE_LIMIT_MAX_REQUESTS, API_RATE_LIMIT_WINDOW_MS, API_RATE_LIMIT_MAX_REQUESTS, ErrorCode } from '../constants';
+import { AUTH_RATE_LIMIT_WINDOW_MS, AUTH_RATE_LIMIT_MAX_REQUESTS, API_RATE_LIMIT_WINDOW_MS, API_RATE_LIMIT_MAX_REQUESTS, CONTACT_RATE_LIMIT_WINDOW_MS, CONTACT_RATE_LIMIT_MAX_REQUESTS, ErrorCode } from '../constants';
 import type { ApiErrorResponse } from '../types';
 
 export const authRateLimiter = rateLimit({
@@ -31,6 +31,21 @@ export const apiRateLimiter = rateLimit({
         code: ErrorCode.RATE_LIMITED,
         message: 'API rate limit exceeded. Please try again in a minute.',
       },
+    };
+    res.status(429).json(response);
+  },
+});
+
+
+export const contactRateLimiter = rateLimit({
+  windowMs: CONTACT_RATE_LIMIT_WINDOW_MS,
+  max: CONTACT_RATE_LIMIT_MAX_REQUESTS,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_req, res) => {
+    const response: ApiErrorResponse = {
+      success: false,
+      error: { code: ErrorCode.RATE_LIMITED, message: 'Too many contact requests. Please try again later.' },
     };
     res.status(429).json(response);
   },
