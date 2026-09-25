@@ -5,7 +5,7 @@ import { eq, desc, inArray } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.js';
 import { ownerMiddleware } from '../middleware/owner.js';
 import { validate } from '../middleware/validate.js';
-import { uuidParamSchema } from '../types/index.js';
+import { uuidParamSchema, adminSettingsSchema } from '../types/index.js';
 import { AppError } from '../middleware/errorHandler.js';
 
 const router = Router();
@@ -101,7 +101,7 @@ router.get('/settings', async (_req, res, next) => {
   } catch (error) { next(error); }
 });
 
-router.put('/settings', async (req, res, next) => {
+router.put('/settings', validate(adminSettingsSchema), async (req, res, next) => {
   try {
     const { google_analytics_id, termly_uuid, privacy_policy_content, terms_of_service_content } = req.body;
     const settingsArray = await db.select().from(systemSettings).limit(1);
