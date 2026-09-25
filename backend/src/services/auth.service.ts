@@ -121,7 +121,7 @@ export async function deleteUserAccount(userId: string, password: string): Promi
   if (config.BLOB_READ_WRITE_TOKEN) {
     for (const doc of userDocs) {
       try {
-        await del(doc.file_url, { access: 'private', token: config.BLOB_READ_WRITE_TOKEN });
+        await del(doc.file_url, { token: config.BLOB_READ_WRITE_TOKEN });
       } catch (blobError: unknown) {
         logger.error('AUTH', 'Failed to delete blob during account deletion; database deletion aborted.', blobError);
         throw new Error(`[${ErrorCode.INTERNAL_ERROR}] Account deletion could not complete because document storage cleanup failed. Please retry.`);
