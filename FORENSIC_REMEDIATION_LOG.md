@@ -243,3 +243,26 @@ Current repository/deployment facts observed:
 The remaining gap is deployment/visual verification of the later presentation-only UI polish, not a demonstrated application failure. Repository CI already passed on the UI-polish commit, including frontend lint, TypeScript, production build, Chromium installation, and public Playwright smoke. The connected Vercel account independently shows the prior remediation deployments are READY and shows no current runtime-error cluster for the frontend project.
 
 No production promotion, rollback, or `main` mutation was performed. Further live visual verification would require either a Vercel deployment containing the later UI commit or an authenticated browser session capable of consuming the protected preview; neither is necessary to preserve the security posture, and neither was fabricated as completed.
+
+
+## Production promotion checkpoint — 2026-09-25
+
+The remediation was promoted to `main` after the Vercel deployment topology was confirmed to use the main branch for the production deployment.
+
+Rollback/comparison protection was established before promotion:
+
+- Branch `pre-remediation-main-2026-09-25` was created directly from the original `main` commit `351dcff05c848498e577f7f71a39131a20bd6058`.
+- Pull request #1 merged `audit-remediation` into `main` with a normal merge commit, preserving the remediation commit history rather than squashing it.
+- The merge commit is `9bf0989ed079addf715dd1c686c5499a4df92f16`.
+- The preserved pre-remediation branch and current main share the same merge base `351dcff05c848498e577f7f71a39131a20bd6058`; GitHub comparison reports the current main as 112 commits ahead of that preserved branch.
+- `audit-remediation` remains available independently for direct source-history comparison.
+
+### Vercel promotion status
+
+The Vercel projects are connected to the repository and the production deployments historically target `main`. After promotion, Vercel's GitHub status checks for the merge commit currently report failure with a `build-rate-limit` target. This is a Vercel account/build-capacity status, not an application test failure.
+
+Before promotion, the most recent preview build failure was separately inspected and identified as a frozen-lockfile mismatch: `frontend/package.json` declared `eslint-config-next` 15.5.19 while `frontend/pnpm-lock.yaml` still resolved 16.2.6. The manifest was corrected to match the existing lockfile before the merge. No application behavior was changed by that correction.
+
+Because the current Vercel status is rate-limited, the existence of the production deployment of merge commit `9bf0989ed079addf715dd1c686c5499a4df92f16` has not been claimed. The last known production deployment remains the original main deployment until Vercel successfully builds and promotes the merged commit.
+
+No rollback was performed. The original production commit remains independently preserved and directly comparable through `pre-remediation-main-2026-09-25`.
