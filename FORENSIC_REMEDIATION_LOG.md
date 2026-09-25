@@ -43,3 +43,13 @@ Production document uploads were returning HTTP 500 when Gemini embedding reques
 
 ### Final CI verification checkpoint
 Hydration-safe password controls are included in this verification tree.
+
+
+## 2026-09-25 — Verification result for explicit-error/auth/legal remediation
+
+- CI verification run 36187412483 completed successfully.
+- Backend build, contract tests, and migration consistency all passed.
+- Frontend lint, TypeScript check, production build, and public Playwright smoke all passed.
+- The first smoke attempt exposed a real Next.js hydration race: Playwright could click the server-rendered password button before React attached the handler. The password controls were therefore changed to remain disabled until hydration completes, and the smoke test now waits for the control to become enabled before exercising it. The corrected run passed all 6 smoke tests, including the password visibility flow.
+- Error mapping was moved into the dependency-free constants layer so contract tests do not initialize runtime configuration merely to test safe client error responses.
+- The completed remediation tree is merged to main. Production deployment of these latest commits remains a separate evidence step because Vercel has recently rate-limited/canceled newer builds; the currently observed READY Vercel deployments are older than the final remediation tree.
