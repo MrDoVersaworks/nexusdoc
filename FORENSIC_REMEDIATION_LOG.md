@@ -39,3 +39,7 @@ Production document uploads were returning HTTP 500 when Gemini embedding reques
 5. Successful uploads must still complete summarization, embedding, persistence, and retrieval exactly as before.
 6. Production legal routes /terms and /privacy must render without console errors and remain responsive.
 7. Production deployment must be independently verified; Vercel build-rate-limit failures are infrastructure/deployment evidence and must not be mistaken for application-test results.
+
+
+### Final CI verification checkpoint
+Hydration-safe password controls are included in this verification tree.
