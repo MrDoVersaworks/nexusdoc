@@ -23,7 +23,7 @@ export default function AdminInboxPage() {
     try {
       const res = await apiRequest<{ data: ContactMessage[] }>({ method: 'GET', path: '/api/admin/inbox' });
       setMessages(res.data);
-    } catch (err) {
+    } catch {
       toast.error('Failed to load inbox messages');
     } finally {
       setLoading(false);
@@ -41,7 +41,7 @@ export default function AdminInboxPage() {
         prev.map((msg) => (msg.id === id ? { ...msg, isRead: !currentStatus } : msg))
       );
       toast.success('Message status updated');
-    } catch (err) {
+    } catch {
       toast.error('Failed to update status');
     }
   };
@@ -52,7 +52,7 @@ export default function AdminInboxPage() {
       await apiRequest({ method: 'DELETE', path: `/api/admin/inbox/${id}` });
       setMessages((prev) => prev.filter((msg) => msg.id !== id));
       toast.success('Message deleted');
-    } catch (err) {
+    } catch {
       toast.error('Failed to delete message');
     }
   };

@@ -2,95 +2,103 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '../utils/logger';
 import { ErrorCode, EMBEDDING_DIMENSION } from '../constants';
 
-export async function summarizeText(
-  apiKey: string,
-  modelName: string,
-  text: string
-): Promise<string> {
+const AI_TIMEOUT_MS = 30_000;
+const EMBEDDING_CONCURRENCY = 4;
+const EMBEDDING_RETRIES = 2;
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => reject(new Error('AI provider timeout')), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function withRetry<T>(operation: () => Promise<T>, attempts: number): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= attempts; attempt += 1) {
+    try { return await withTimeout(operation(), AI_TIMEOUT_MS); }
+    catch (error) {
+      lastError = error;
+      if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt));
+    }
+  }
+  throw lastError;
+}
+
+export async function summarizeText(apiKey: string, modelName: string, text: string): Promise<string> {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: modelName });
+  const maxChars = 30_000;
+  const boundedText = text.substring(0, maxChars);
+  const scopeNote = text.length > maxChars
+    ? 'NOTE: The source document exceeded the current summary input budget. This summary is based only on the first 30,000 characters; it is not a whole-document summary.'
+    : 'The complete extracted document is included below.';
 
-  const prompt = `You are a document analysis assistant. Analyze the following document and provide a comprehensive summary that includes:
+  const prompt = `You are a document analysis assistant. Analyze the supplied document and provide a structured summary with:
+1. Main Topic
+2. Key Points
+3. Key Entities
+4. Conclusion/Takeaways
 
-1. **Main Topic**: What is this document about?
-2. **Key Points**: The most important points or findings (bullet points)
-3. **Key Entities**: Important names, organizations, dates, or figures mentioned
-4. **Conclusion/Takeaways**: The main conclusions or actionable takeaways
+${scopeNote}
 
 Document text:
 ---
-${text.substring(0, 30000)}
+${boundedText}
 ---
-
-Provide the summary in a clear, structured format.`;
+`;
 
   try {
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const summary = response.text();
-
-    if (!summary || summary.trim().length === 0) {
-      throw new Error(`[${ErrorCode.AI_SUMMARIZATION_FAILED}] Gemini returned an empty summary.`);
-    }
-
+    const result = await withRetry(() => model.generateContent(prompt), 2);
+    const summary = result.response.text();
+    if (!summary || summary.trim().length === 0) throw new Error(`[${ErrorCode.AI_SUMMARIZATION_FAILED}] Gemini returned an empty summary.`);
     return summary;
   } catch (error: unknown) {
-    if (error instanceof Error && error.message.includes(ErrorCode.AI_SUMMARIZATION_FAILED)) {
-      throw error;
-    }
+    if (error instanceof Error && error.message.includes(ErrorCode.AI_SUMMARIZATION_FAILED)) throw error;
     logger.error('AI_SERVICE', 'Summarization failed', error);
     throw new Error(`[${ErrorCode.AI_SUMMARIZATION_FAILED}] Failed to generate document summary. Please check your API key and model configuration.`);
   }
 }
 
-export async function generateEmbedding(
-  apiKey: string,
-  embeddingModelName: string,
-  text: string
-): Promise<number[]> {
+export async function generateEmbedding(apiKey: string, embeddingModelName: string, text: string): Promise<number[]> {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: embeddingModelName });
-
   try {
-    const result = await model.embedContent(text);
-    let embedding = result.embedding.values;
-
-    if (!embedding || embedding.length === 0) {
-      throw new Error(`[${ErrorCode.AI_EMBEDDING_FAILED}] Gemini returned an empty embedding.`);
+    const result = await withRetry(() => model.embedContent(text), EMBEDDING_RETRIES);
+    const embedding = result.embedding.values;
+    if (!embedding || embedding.length === 0) throw new Error(`[${ErrorCode.AI_EMBEDDING_FAILED}] Gemini returned an empty embedding.`);
+    if (embedding.length !== EMBEDDING_DIMENSION) {
+      throw new Error(`[${ErrorCode.AI_EMBEDDING_FAILED}] Embedding model returned ${embedding.length} dimensions; configured pgvector contract requires exactly ${EMBEDDING_DIMENSION}.`);
     }
-
-    // Adaptive Dimension Normalizer
-    if (embedding.length > EMBEDDING_DIMENSION) {
-      // Truncate (Matryoshka Representation Learning fallback)
-      embedding = embedding.slice(0, EMBEDDING_DIMENSION);
-      logger.info('AI_SERVICE', `Truncated embedding from ${result.embedding.values.length} to ${EMBEDDING_DIMENSION} dimensions.`);
-    } else if (embedding.length < EMBEDDING_DIMENSION) {
-      // Pad with zeroes
-      const padded = new Array(EMBEDDING_DIMENSION).fill(0);
-      for (let i = 0; i < embedding.length; i++) {
-        padded[i] = embedding[i];
-      }
-      embedding = padded;
-      logger.info('AI_SERVICE', `Padded embedding from ${result.embedding.values.length} to ${EMBEDDING_DIMENSION} dimensions.`);
-    }
-
     return embedding;
   } catch (error: unknown) {
-    if (error instanceof Error && error.message.includes(ErrorCode.AI_EMBEDDING_FAILED)) {
-      throw error;
-    }
+    if (error instanceof Error && error.message.includes(ErrorCode.AI_EMBEDDING_FAILED)) throw error;
     logger.error('AI_SERVICE', 'Embedding generation failed', error);
     throw new Error(`[${ErrorCode.AI_EMBEDDING_FAILED}] Failed to generate embedding. Please check your API key and embedding model configuration.`);
   }
 }
 
-export async function generateEmbeddings(
-  apiKey: string,
-  embeddingModelName: string,
-  texts: string[]
-): Promise<number[][]> {
-  logger.info('AI_SERVICE', `Generating embeddings for ${texts.length} items in parallel...`);
-  return Promise.all(
-    texts.map((text) => generateEmbedding(apiKey, embeddingModelName, text))
-  );
+export async function generateEmbeddings(apiKey: string, embeddingModelName: string, texts: string[]): Promise<number[][]> {
+  logger.info('AI_SERVICE', `Generating embeddings for ${texts.length} items with concurrency ${EMBEDDING_CONCURRENCY}...`);
+  const results = new Array<number[]>(texts.length);
+  let nextIndex = 0;
+
+  async function worker(): Promise<void> {
+    while (true) {
+      const index = nextIndex++;
+      if (index >= texts.length) return;
+      results[index] = await generateEmbedding(apiKey, embeddingModelName, texts[index]);
+    }
+  }
+
+  const workerCount = Math.min(EMBEDDING_CONCURRENCY, texts.length);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  return results;
 }

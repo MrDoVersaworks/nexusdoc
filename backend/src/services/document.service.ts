@@ -1,224 +1,203 @@
 import { eq, and, desc, asc, sql } from 'drizzle-orm';
-import { put, del } from '@vercel/blob';
+import { put, del, get } from '@vercel/blob';
+import { randomUUID } from 'node:crypto';
+import type { Response } from 'express';
 import { db } from '../db/connection';
-import { documents, documentChunks } from '../db/schema';
+import { documents, documentChunks, storageCleanupTasks } from '../db/schema';
 import { config } from '../config';
-import { ErrorCode, MAX_FILE_SIZE_BYTES, ACCEPTED_MIME_TYPES } from '../constants';
+import { ErrorCode, MAX_FILE_SIZE_BYTES, ACCEPTED_MIME_TYPES, ACCEPTED_EXTENSIONS } from '../constants';
 import { extractText } from '../utils/textExtractor';
 import { chunkText } from '../utils/chunker';
 import { summarizeText, generateEmbeddings } from './ai.service';
 import { getDecryptedApiKey, getUserModels } from './settings.service';
 import { logger } from '../utils/logger';
-import type { DocumentResponse, PaginationMeta } from '../types';
+import type { DocumentListItem, DocumentDetail, PaginationMeta } from '../types';
 
-interface UploadDocumentInput {
-  userId: string;
-  title: string;
-  file: Express.Multer.File;
+interface UploadDocumentInput { userId: string; title: string; file: Express.Multer.File; }
+interface ListDocumentsInput { userId: string; page: number; limit: number; sort: string; order: string; }
+interface ListDocumentsResult { documents: DocumentListItem[]; pagination: PaginationMeta; }
+
+function baseName(name: string): string {
+  const normalized = name.replace(/\\/g, '/');
+  return normalized.substring(normalized.lastIndexOf('/') + 1);
 }
 
-interface ListDocumentsInput {
-  userId: string;
-  page: number;
-  limit: number;
-  sort: string;
-  order: string;
+function validateFileContent(file: Express.Multer.File): void {
+  const extension = `.${baseName(file.originalname).split('.').pop()?.toLowerCase() ?? ''}`;
+  if (!(ACCEPTED_EXTENSIONS as readonly string[]).includes(extension)) {
+    throw new Error(`[${ErrorCode.DOC_INVALID_TYPE}] Unsupported file extension.`);
+  }
+  if (!ACCEPTED_MIME_TYPES.includes(file.mimetype as typeof ACCEPTED_MIME_TYPES[number])) {
+    throw new Error(`[${ErrorCode.DOC_INVALID_TYPE}] Invalid file type metadata.`);
+  }
+  if (file.mimetype === 'application/pdf') {
+    if (file.buffer.subarray(0, 5).toString('ascii') !== '%PDF-') {
+      throw new Error(`[${ErrorCode.DOC_INVALID_TYPE}] File content does not match PDF format.`);
+    }
+    return;
+  }
+  if (file.buffer.includes(0)) {
+    throw new Error(`[${ErrorCode.DOC_INVALID_TYPE}] Text upload contains binary data.`);
+  }
+  try {
+    new TextDecoder('utf-8', { fatal: true }).decode(file.buffer);
+  } catch {
+    throw new Error(`[${ErrorCode.DOC_INVALID_TYPE}] Text upload is not valid UTF-8.`);
+  }
 }
 
-interface ListDocumentsResult {
-  documents: DocumentResponse[];
-  pagination: PaginationMeta;
-}
-
-function toDocumentResponse(doc: typeof documents.$inferSelect): DocumentResponse {
+function toListItem(doc: typeof documents.$inferSelect): DocumentListItem {
   return {
     id: doc.id,
-    user_id: doc.user_id,
     title: doc.title,
     original_filename: doc.original_filename,
-    file_url: doc.file_url,
     file_type: doc.file_type,
     file_size_bytes: doc.file_size_bytes,
-    content_text: doc.content_text,
     ai_summary: doc.ai_summary,
     created_at: doc.created_at.toISOString(),
     updated_at: doc.updated_at.toISOString(),
+    download_path: `/api/documents/${doc.id}/download`,
   };
 }
 
-export async function uploadDocument(input: UploadDocumentInput): Promise<DocumentResponse> {
+function toDetail(doc: typeof documents.$inferSelect): DocumentDetail {
+  return { ...toListItem(doc), user_id: doc.user_id, content_text: doc.content_text };
+}
+
+async function recordCleanupFailure(blobUrl: string, userId: string, reason: string, error: unknown): Promise<void> {
+  try {
+    await db.insert(storageCleanupTasks).values({
+      blob_url: blobUrl,
+      user_id: userId,
+      reason,
+      attempts: 0,
+      last_error: error instanceof Error ? error.message : String(error),
+    });
+  } catch (recordError) {
+    logger.error('DOCUMENT', 'Failed to persist storage cleanup task', recordError);
+  }
+}
+
+export async function uploadDocument(input: UploadDocumentInput): Promise<DocumentDetail> {
   const { userId, title, file } = input;
+  if (file.size > MAX_FILE_SIZE_BYTES) throw new Error(`[${ErrorCode.DOC_TOO_LARGE}] File exceeds maximum size of ${MAX_FILE_SIZE_BYTES / (1024 * 1024)}MB.`);
+  validateFileContent(file);
+  if (!config.BLOB_READ_WRITE_TOKEN) throw new Error(`[${ErrorCode.DOC_UPLOAD_FAILED}] File storage is not configured.`);
 
-  // Validate file type
-  if (!ACCEPTED_MIME_TYPES.includes(file.mimetype as typeof ACCEPTED_MIME_TYPES[number])) {
-    throw new Error(`[${ErrorCode.DOC_INVALID_TYPE}] Invalid file type: ${file.mimetype}. Accepted: ${ACCEPTED_MIME_TYPES.join(', ')}`);
-  }
-
-  // Validate file size
-  if (file.size > MAX_FILE_SIZE_BYTES) {
-    throw new Error(`[${ErrorCode.DOC_TOO_LARGE}] File exceeds maximum size of ${MAX_FILE_SIZE_BYTES / (1024 * 1024)}MB.`);
-  }
-
-  // Validate blob storage token before upload
-  if (!config.BLOB_READ_WRITE_TOKEN) {
-    throw new Error(`[${ErrorCode.DOC_UPLOAD_FAILED}] File storage is not configured. Set BLOB_READ_WRITE_TOKEN in your environment.`);
-  }
-
-  // Upload to Vercel Blob
-  const blob = await put(`documents/${userId}/${Date.now()}-${file.originalname}`, file.buffer, {
-    access: 'public',
+  const safeFilename = baseName(file.originalname);
+  const blob = await put(`documents/${userId}/${randomUUID()}-${safeFilename}`, file.buffer, {
+    access: 'private',
+    addRandomSuffix: true,
+    contentType: file.mimetype,
     token: config.BLOB_READ_WRITE_TOKEN,
   });
 
-  // Extract text
-  const contentText = await extractText(file.buffer, file.mimetype);
+  try {
+    const contentText = await extractText(file.buffer, file.mimetype);
+    const apiKey = await getDecryptedApiKey(userId);
+    const models = await getUserModels(userId);
+    const aiSummary = await summarizeText(apiKey, models.geminiModel, contentText);
+    const chunks = chunkText(contentText);
+    const embeddings = chunks.length > 0
+      ? await generateEmbeddings(apiKey, models.geminiEmbeddingModel, chunks.map((c) => c.text))
+      : [];
 
-  const apiKey = await getDecryptedApiKey(userId);
-  const models = await getUserModels(userId);
-
-  // Summarize
-  const aiSummary = await summarizeText(apiKey, models.geminiModel, contentText);
-
-  // Chunk and embed
-  const chunks = chunkText(contentText);
-  let embeddings: number[][] = [];
-  if (chunks.length > 0) {
-    embeddings = await generateEmbeddings(
-      apiKey,
-      models.geminiEmbeddingModel,
-      chunks.map((c) => c.text)
-    );
-  }
-
-  // Insert document first
-  const inserted = await db
-    .insert(documents)
-    .values({
+    const documentId = randomUUID();
+    const documentValues = {
+      id: documentId,
       user_id: userId,
       title,
-      original_filename: file.originalname,
+      original_filename: safeFilename,
       file_url: blob.url,
       file_type: file.mimetype,
       file_size_bytes: file.size,
       content_text: contentText,
       ai_summary: aiSummary,
-    })
-    .returning();
+    };
 
-  if (inserted.length === 0) {
-    throw new Error(`[${ErrorCode.DOC_UPLOAD_FAILED}] Failed to save document to database.`);
-  }
-
-  const document = inserted[0];
-
-  // Insert chunks with embeddings via ORM (manual atomic emulation)
-  try {
-    if (chunks.length > 0 && embeddings.length === chunks.length) {
+    if (chunks.length > 0) {
       const chunkValues = chunks.map((chunk, i) => ({
-        document_id: document.id,
+        document_id: documentId,
         user_id: userId,
         chunk_text: chunk.text,
         embedding: embeddings[i],
         chunk_index: chunk.index,
       }));
-
-      await db.insert(documentChunks).values(chunkValues);
+      const batch = await db.batch([
+        db.insert(documents).values(documentValues).returning(),
+        db.insert(documentChunks).values(chunkValues),
+      ]);
+      const inserted = batch[0];
+      if (!Array.isArray(inserted) || inserted.length !== 1) throw new Error('Document insert did not return one row.');
+      logger.info('DOCUMENT', `Document uploaded: ${documentId} for user: ${userId}. ${chunks.length} chunks embedded.`);
+      return toDetail(inserted[0]);
     }
-  } catch (dbError: unknown) {
-    // Rollback document if chunks fail (Determinism / C12)
-    logger.error('DOCUMENT', 'Failed to insert chunks, rolling back document creation', dbError);
-    await db.delete(documents).where(eq(documents.id, document.id));
-    throw new Error(`[${ErrorCode.DOC_UPLOAD_FAILED}] Failed to save document analysis to database.`);
+
+    const [inserted] = await db.insert(documents).values(documentValues).returning();
+    if (!inserted) throw new Error('Document insert did not return a row.');
+    return toDetail(inserted);
+  } catch (error: unknown) {
+    try {
+      await del(blob.url, { token: config.BLOB_READ_WRITE_TOKEN });
+    } catch (cleanupError) {
+      await recordCleanupFailure(blob.url, userId, 'upload-compensation', cleanupError);
+    }
+    throw error;
   }
-
-  const result = document;
-
-  logger.info('DOCUMENT', `Document uploaded: ${result.id} for user: ${userId}. ${chunks.length} chunks embedded.`);
-
-  return toDocumentResponse(result);
 }
 
 export async function listDocuments(input: ListDocumentsInput): Promise<ListDocumentsResult> {
   const { userId, page, limit, sort, order } = input;
   const offset = (page - 1) * limit;
-
-  // Get total count
-  const countResult = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(documents)
-    .where(eq(documents.user_id, userId));
-
-  if (countResult.length === 0) {
-    throw new Error(`[${ErrorCode.INTERNAL_ERROR}] Failed to retrieve document count.`);
-  }
-
-  const total = countResult[0].count;
-
-  // Get paginated documents
-  const sortColumn = sort === 'title' ? documents.title :
-                     sort === 'updated_at' ? documents.updated_at :
-                     documents.created_at;
-
+  const countResult = await db.select({ count: sql<number>`count(*)::int` }).from(documents).where(eq(documents.user_id, userId));
+  const total = countResult[0]?.count ?? 0;
+  const sortColumn = sort === 'title' ? documents.title : sort === 'updated_at' ? documents.updated_at : documents.created_at;
   const orderFn = order === 'asc' ? asc : desc;
-
-  const docs = await db
-    .select()
-    .from(documents)
-    .where(eq(documents.user_id, userId))
-    .orderBy(orderFn(sortColumn))
-    .limit(limit)
-    .offset(offset);
-
+  const docs = await db.select().from(documents).where(eq(documents.user_id, userId)).orderBy(orderFn(sortColumn)).limit(limit).offset(offset);
   return {
-    documents: docs.map(toDocumentResponse),
-    pagination: {
-      page,
-      limit,
-      total,
-      totalPages: Math.ceil(total / limit),
-    },
+    documents: docs.map(toListItem),
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
   };
 }
 
-export async function getDocument(userId: string, documentId: string): Promise<DocumentResponse> {
-  const docs = await db
-    .select()
-    .from(documents)
-    .where(and(eq(documents.id, documentId), eq(documents.user_id, userId)))
-    .limit(1);
+export async function getDocument(userId: string, documentId: string): Promise<DocumentDetail> {
+  const docs = await db.select().from(documents).where(and(eq(documents.id, documentId), eq(documents.user_id, userId))).limit(1);
+  if (docs.length === 0) throw new Error(`[${ErrorCode.DOC_NOT_FOUND}] Document not found.`);
+  return toDetail(docs[0]);
+}
 
-  if (docs.length === 0) {
-    throw new Error(`[${ErrorCode.DOC_NOT_FOUND}] Document not found.`);
-  }
+export async function downloadDocument(userId: string, documentId: string, res: Response): Promise<void> {
+  const docs = await db.select({
+    id: documents.id, file_url: documents.file_url, original_filename: documents.original_filename, file_type: documents.file_type,
+  }).from(documents).where(and(eq(documents.id, documentId), eq(documents.user_id, userId))).limit(1);
+  if (docs.length === 0) throw new Error(`[${ErrorCode.DOC_NOT_FOUND}] Document not found.`);
+  if (!config.BLOB_READ_WRITE_TOKEN) throw new Error(`[${ErrorCode.DOC_UPLOAD_FAILED}] File storage is not configured.`);
 
-  return toDocumentResponse(docs[0]);
+  const result = await get(docs[0].file_url, { access: 'private', token: config.BLOB_READ_WRITE_TOKEN });
+  if (!result || result.statusCode !== 200 || !result.stream) throw new Error(`[${ErrorCode.DOC_NOT_FOUND}] Stored document could not be retrieved.`);
+
+  res.status(200);
+  res.setHeader('Content-Type', docs[0].file_type);
+  res.setHeader('Content-Disposition', `attachment; filename="${docs[0].original_filename.replace(/["\\\r\n]/g, '_')}"`);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Cache-Control', 'private, no-store');
+  const { Readable } = await import('node:stream');
+  Readable.fromWeb(result.stream as globalThis.ReadableStream<Uint8Array>).pipe(res);
 }
 
 export async function deleteDocument(userId: string, documentId: string): Promise<void> {
-  // Verify ownership and get file URL for blob cleanup
-  const docs = await db
-    .select({ id: documents.id, file_url: documents.file_url })
-    .from(documents)
-    .where(and(eq(documents.id, documentId), eq(documents.user_id, userId)))
-    .limit(1);
+  const docs = await db.select({ id: documents.id, file_url: documents.file_url })
+    .from(documents).where(and(eq(documents.id, documentId), eq(documents.user_id, userId))).limit(1);
+  if (docs.length === 0) throw new Error(`[${ErrorCode.DOC_NOT_FOUND}] Document not found.`);
+  if (!config.BLOB_READ_WRITE_TOKEN) throw new Error(`[${ErrorCode.DOC_UPLOAD_FAILED}] File storage is not configured.`);
 
-  if (docs.length === 0) {
-    throw new Error(`[${ErrorCode.DOC_NOT_FOUND}] Document not found.`);
+  try {
+    await del(docs[0].file_url, { token: config.BLOB_READ_WRITE_TOKEN });
+  } catch (error: unknown) {
+    await recordCleanupFailure(docs[0].file_url, userId, 'document-delete', error);
+    throw new Error(`[${ErrorCode.INTERNAL_ERROR}] Document storage cleanup failed; the document was retained. Please retry.`);
   }
 
-  // Delete from Vercel Blob
-  if (config.BLOB_READ_WRITE_TOKEN) {
-    try {
-      await del(docs[0].file_url, { token: config.BLOB_READ_WRITE_TOKEN });
-    } catch (error: unknown) {
-      logger.error('DOCUMENT', `Failed to delete blob for document ${documentId}`, error);
-    }
-  } else {
-    logger.warn('DOCUMENT', `BLOB_READ_WRITE_TOKEN not set, skipping blob deletion for document ${documentId}`);
-  }
-
-  // Delete document — userId-scoped for defense-in-depth (cascades to chunks via FK)
   await db.delete(documents).where(and(eq(documents.id, documentId), eq(documents.user_id, userId)));
-
   logger.info('DOCUMENT', `Document deleted: ${documentId} for user: ${userId}`);
 }

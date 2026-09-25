@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import Link from 'next/link';
 import { apiRequest } from '@/lib/api';
 import styles from './dashboard.module.css';
 
@@ -83,21 +84,21 @@ export default function DashboardPage() {
       <section className={styles.quickActions}>
         <h2 className={styles.sectionTitle}>Quick Actions</h2>
         <div className={styles.actionsGrid}>
-          <a href="/dashboard/documents" className={`card ${styles.actionCard}`} id="action-upload">
+          <Link href="/dashboard/documents" className={`card ${styles.actionCard}`} id="action-upload">
             <span className={styles.actionIcon}>📤</span>
             <span className={styles.actionLabel}>Upload Document</span>
             <span className={styles.actionDesc}>Add a PDF or text file for AI analysis</span>
-          </a>
-          <a href="/dashboard/search" className={`card ${styles.actionCard}`} id="action-search">
+          </Link>
+          <Link href="/dashboard/search" className={`card ${styles.actionCard}`} id="action-search">
             <span className={styles.actionIcon}>🔎</span>
             <span className={styles.actionLabel}>Semantic Search</span>
             <span className={styles.actionDesc}>Find information across your documents</span>
-          </a>
-          <a href="/dashboard/settings" className={`card ${styles.actionCard}`} id="action-settings">
+          </Link>
+          <Link href="/dashboard/settings" className={`card ${styles.actionCard}`} id="action-settings">
             <span className={styles.actionIcon}>🔑</span>
             <span className={styles.actionLabel}>Configure AI</span>
             <span className={styles.actionDesc}>Set up your Gemini API key and model</span>
-          </a>
+          </Link>
         </div>
       </section>
     </div>

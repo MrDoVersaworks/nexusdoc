@@ -1,15 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
 export interface Review {
-  id: string;
-  name: string;
-  rating: number;
-  feedback: string;
-  profession?: string;
-  createdAt?: string;
+  id: string; name: string; rating: number; feedback: string; profession?: string; createdAt?: string;
 }
 
 export function PlatformReviews() {
@@ -17,208 +12,112 @@ export function PlatformReviews() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  
-  const [form, setForm] = useState({
-    name: '',
-    profession: '',
-    rating: 5,
-    feedback: ''
-  });
+  const [form, setForm] = useState({ name: '', profession: '', rating: 5, feedback: '' });
+
+  const backendUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000').replace(/\/$/, '');
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('nexusdoc_app_reviews');
-      if (stored) {
-        setReviews(JSON.parse(stored));
-      }
-    } catch {
-      // Ignore storage errors
-    }
-  }, []);
+    fetch(`${backendUrl}/api/public/reviews`)
+      .then((r) => r.json())
+      .then((json) => { if (json.success) setReviews(json.data); })
+      .catch(() => setReviews([]));
+  }, [backendUrl]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.feedback.trim()) {
-      setErrorMsg('Please complete all required fields.');
+      setErrorMsg('Please complete the required fields.');
       return;
     }
-    
-    setIsSubmitting(true);
-    setErrorMsg('');
-
-    const newReview: Review = {
-      id: Date.now().toString(),
-      name: form.name.trim(),
-      profession: form.profession.trim() || 'Verified User',
-      rating: form.rating,
-      feedback: form.feedback.trim(),
-      createdAt: new Date().toLocaleDateString()
-    };
-
+    setIsSubmitting(true); setErrorMsg('');
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
-      await fetch(`${backendUrl}/api/contact`, {
+      const response = await fetch(`${backendUrl}/api/public/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          email: `${form.name.trim().toLowerCase().replace(/\s+/g, '.')}@user.nexusdoc`,
-          message: `[NexusDoc App Review - ${form.rating}/5 Stars] (${form.profession || 'User'}): ${form.feedback.trim()}`
-        })
+        body: JSON.stringify(form),
       });
-    } catch {
-      // Still persist locally even if backend transmission fails
+      const json = await response.json().catch(() => null);
+      if (!response.ok || !json?.success) throw new Error(json?.error?.message || 'Failed to submit review.');
+      setSubmitted(true);
+      setForm({ name: '', profession: '', rating: 5, feedback: '' });
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : 'Failed to submit review.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const updated = [newReview, ...reviews];
-    setReviews(updated);
-    try {
-      localStorage.setItem('nexusdoc_app_reviews', JSON.stringify(updated));
-    } catch {
-      // Ignore storage errors
-    }
-
-    setSubmitted(true);
-    setIsSubmitting(false);
-    setForm({ name: '', profession: '', rating: 5, feedback: '' });
   };
 
   return (
-    <div style={{ padding: '4rem 2rem', maxWidth: '1000px', margin: '0 auto', position: 'relative', zIndex: 10 }}>
-      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-        <h2 style={{ fontSize: '2.25rem', fontWeight: 'bold', marginBottom: '0.75rem', color: '#fff' }}>
-          NexusDoc <span style={{ color: '#06b6d4' }}>App Experience &amp; Reviews</span>
-        </h2>
-        <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-          Share your experience using NexusDoc for document intelligence, AI summarization, and vector search.
-        </p>
+    <section style={styles.section} aria-labelledby="reviews-title">
+      <div style={styles.heading}>
+        <h2 id="reviews-title" style={styles.title}>NexusDoc <span style={styles.accent}>reviews</span></h2>
+        <p style={styles.subtitle}>Share your experience with document intelligence, AI summarization, and vector search.</p>
       </div>
 
-      {/* Render Submitted Reviews */}
-      {reviews.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+      {reviews.length > 0 && (
+        <div style={styles.reviewGrid}>
           {reviews.map((review) => (
-            <div key={review.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: '1rem', padding: '1.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <div style={{ color: '#fbbf24', fontSize: '1rem' }}>{'★'.repeat(review.rating)}</div>
-                {review.createdAt && <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{review.createdAt}</span>}
+            <article key={review.id} style={styles.reviewCard}>
+              <div style={styles.reviewMeta}>
+                <span style={styles.stars} aria-label={`${review.rating} out of 5 stars`}>{'★'.repeat(review.rating)}</span>
+                {review.createdAt && <time style={styles.date}>{new Date(review.createdAt).toLocaleDateString()}</time>}
               </div>
-              <p style={{ color: '#e2e8f0', fontSize: '0.95rem', fontStyle: 'italic', marginBottom: '1rem', lineHeight: 1.5 }}>&ldquo;{review.feedback}&rdquo;</p>
-              <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#fff' }}>{review.name} <span style={{ color: '#06b6d4', fontWeight: 400 }}>• {review.profession}</span></div>
-            </div>
+              <p style={styles.feedback}>“{review.feedback}”</p>
+              <div style={styles.reviewer}>{review.name}{review.profession && <span style={styles.profession}> · {review.profession}</span>}</div>
+            </article>
           ))}
-        </div>
-      ) : (
-        <div style={{ textAlign: 'center', padding: '2rem', background: 'rgba(255,255,255,0.01)', border: '1px border-dashed rgba(255,255,255,0.08)', borderRadius: '1rem', marginBottom: '2.5rem' }}>
-          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>No user reviews submitted yet. Be the first to share your experience with NexusDoc below!</p>
         </div>
       )}
 
-      {/* Review Submission Form */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        style={{ 
-          background: 'rgba(5, 5, 5, 0.6)', 
-          border: '1px solid rgba(6, 182, 212, 0.2)', 
-          borderRadius: '1.25rem', 
-          padding: '2rem',
-          backdropFilter: 'blur(12px)',
-          maxWidth: '650px',
-          margin: '0 auto'
-        }}
-      >
+      <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+        style={styles.formCard}>
         {submitted ? (
-          <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(6, 182, 212, 0.15)', color: '#06b6d4', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto', fontSize: '1.5rem', fontWeight: 'bold' }}>✓</div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>Review Published!</h3>
-            <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1rem' }}>Your feedback has been published and added to the NexusDoc reviews above.</p>
-            <button
-              onClick={() => setSubmitted(false)}
-              style={{ background: 'rgba(255,255,255,0.05)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}
-            >
-              Write Another Review
-            </button>
+          <div style={styles.success}>
+            <h3 style={styles.formTitle}>Review submitted</h3>
+            <p style={styles.formCopy}>Thanks. Your review is awaiting moderation and will appear here if approved.</p>
+            <button onClick={() => setSubmitted(false)} style={styles.secondaryButton}>Write another review</button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#fff', textAlign: 'center' }}>
-              Submit NexusDoc Usage Review
-            </h3>
-
-            {errorMsg && (
-              <div style={{ color: '#f87171', fontSize: '0.85rem', textAlign: 'center', background: 'rgba(248, 113, 113, 0.1)', padding: '0.5rem', borderRadius: '0.5rem' }}>
-                {errorMsg}
-              </div>
-            )}
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.4rem' }}>Your Name *</label>
-                <input 
-                  type="text" 
-                  required
-                  maxLength={100}
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="e.g. David Sterling"
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', padding: '0.6rem 0.8rem', color: '#fff', fontSize: '0.9rem', outline: 'none' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.4rem' }}>Role / Profession</label>
-                <input 
-                  type="text"
-                  maxLength={100}
-                  value={form.profession}
-                  onChange={(e) => setForm({ ...form, profession: e.target.value })}
-                  placeholder="e.g. Lead Architect"
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', padding: '0.6rem 0.8rem', color: '#fff', fontSize: '0.9rem', outline: 'none' }}
-                />
-              </div>
-            </div>
-
+          <form onSubmit={handleSubmit} style={styles.form}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.4rem' }}>App Rating</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    type="button"
-                    key={star}
-                    onClick={() => setForm({ ...form, rating: star })}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem', color: star <= form.rating ? '#fbbf24' : '#475569', padding: '0 0.2rem' }}
-                  >
-                    ★
-                  </button>
-                ))}
-              </div>
+              <h3 style={styles.formTitle}>Share your experience</h3>
+              <p style={styles.formCopy}>Your review will be published after moderation.</p>
             </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.4rem' }}>NexusDoc App Experience *</label>
-              <textarea 
-                required
-                rows={3}
-                maxLength={1000}
-                value={form.feedback}
-                onChange={(e) => setForm({ ...form, feedback: e.target.value })}
-                placeholder="How was your experience with NexusDoc's document intelligence and search?"
-                style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', padding: '0.6rem 0.8rem', color: '#fff', fontSize: '0.9rem', outline: 'none', resize: 'none' }}
-              />
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={isSubmitting}
-              style={{ background: '#06b6d4', color: '#0f172a', fontWeight: 'bold', padding: '0.75rem 1.5rem', borderRadius: '0.5rem', border: 'none', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1, transition: 'all 0.2s' }}
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit & Display Review'}
-            </button>
+            {errorMsg && <div role="alert" style={styles.error}>{errorMsg}</div>}
+            <input required maxLength={255} placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <input maxLength={255} placeholder="Role / profession" value={form.profession} onChange={(e) => setForm({ ...form, profession: e.target.value })} />
+            <div style={styles.rating} aria-label="Choose a rating">{[1,2,3,4,5].map((star) => <button type="button" key={star} onClick={() => setForm({ ...form, rating: star })} aria-label={`${star} star`} style={{ ...styles.starButton, color: star <= form.rating ? '#ffb340' : '#52525b' }}>★</button>)}</div>
+            <textarea required rows={4} maxLength={2000} placeholder="How was your experience?" value={form.feedback} onChange={(e) => setForm({ ...form, feedback: e.target.value })} />
+            <button type="submit" disabled={isSubmitting} style={styles.primaryButton}>{isSubmitting ? 'Submitting…' : 'Submit review'}</button>
           </form>
         )}
       </motion.div>
-    </div>
+    </section>
   );
 }
+
+const styles: { [key: string]: React.CSSProperties } = {
+  section: { padding: '72px 24px', maxWidth: 1040, margin: '0 auto' },
+  heading: { textAlign: 'center', marginBottom: 40 },
+  title: { fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontWeight: 700, letterSpacing: '-.04em', color: '#f5f5f7', marginBottom: 8 },
+  accent: { color: '#6c5ce7' },
+  subtitle: { color: '#a1a1aa', fontSize: '.95rem', maxWidth: 640, margin: '0 auto', lineHeight: 1.6 },
+  reviewGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))', gap: 12, marginBottom: 24 },
+  reviewCard: { background: '#111316', border: '1px solid #27292e', borderRadius: 14, padding: 22 },
+  reviewMeta: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 14 },
+  stars: { color: '#ffb340', letterSpacing: 1, fontSize: 14 },
+  date: { fontSize: 12, color: '#71717a' },
+  feedback: { color: '#d4d4d8', lineHeight: 1.6, marginBottom: 16 },
+  reviewer: { color: '#f5f5f7', fontWeight: 600, fontSize: 14 },
+  profession: { color: '#71717a', fontWeight: 400 },
+  formCard: { background: '#111316', border: '1px solid #27292e', borderRadius: 16, padding: '28px', maxWidth: 620, margin: '0 auto', boxShadow: '0 12px 32px rgba(0,0,0,.16)' },
+  form: { display: 'flex', flexDirection: 'column', gap: 14 },
+  formTitle: { fontSize: 18, fontWeight: 600, color: '#f5f5f7', marginBottom: 4 },
+  formCopy: { color: '#a1a1aa', fontSize: 13, lineHeight: 1.5 },
+  rating: { display: 'flex', gap: 2 },
+  starButton: { background: 'none', border: 0, cursor: 'pointer', fontSize: 22, lineHeight: 1, padding: 4 },
+  primaryButton: { background: '#6c5ce7', color: '#fff', fontWeight: 600, padding: '12px 18px', borderRadius: 10, border: 0, cursor: 'pointer' },
+  secondaryButton: { marginTop: 16, background: 'transparent', color: '#a1a1aa', border: '1px solid #3a3d44', padding: '9px 14px', borderRadius: 10, cursor: 'pointer' },
+  error: { color: '#ff453a', background: 'rgba(255,69,58,.08)', border: '1px solid rgba(255,69,58,.2)', padding: '9px 12px', borderRadius: 9, fontSize: 13 },
+  success: { textAlign: 'center' },
+};

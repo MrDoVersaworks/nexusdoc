@@ -95,7 +95,7 @@ export default function SearchPage() {
       ) : results.length > 0 ? (
         <div className={styles.results}>
           <p className={styles.resultCount}>{results.length} result{results.length !== 1 ? 's' : ''} found</p>
-          {results.map((result, i) => (
+          {results.map((result) => (
             <div key={`${result.document_id}-${result.chunk_index}`} className={`card ${styles.resultCard}`}>
               <div className={styles.resultHeader}>
                 <a

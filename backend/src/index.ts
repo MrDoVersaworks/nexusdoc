@@ -13,6 +13,7 @@ import publicRoutes from './routes/public.routes.js';
 import statsRoutes from './routes/stats.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import contactRoutes from './routes/contact.routes.js';
+import storageCleanupRoutes from './routes/storage-cleanup.routes.js';
 
 const app = express();
 
@@ -62,6 +63,7 @@ app.use('/api/public', publicRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/internal/storage-cleanup', storageCleanupRoutes);
 
 // ============================================================
 // 404 HANDLER

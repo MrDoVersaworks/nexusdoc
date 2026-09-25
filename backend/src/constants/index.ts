@@ -49,6 +49,8 @@ export const AUTH_RATE_LIMIT_MAX_REQUESTS = 20; // Tightened for security
 
 export const API_RATE_LIMIT_WINDOW_MS = 1 * 60 * 1000; // 1 minute
 export const API_RATE_LIMIT_MAX_REQUESTS = 60; // 60 requests per minute for general API
+export const CONTACT_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+export const CONTACT_RATE_LIMIT_MAX_REQUESTS = 5;
 
 // ============================================================
 // EMBEDDING

@@ -9,57 +9,34 @@ interface FooterProps {
 
 export function UnifiedFooter({ platformName, techStack, contactLink, creatorName = 'Oyewole Favour' }: FooterProps) {
   return (
-    <footer style={{
-      marginTop: 'auto',
-      borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-      padding: '3rem 2rem',
-      color: '#64748b',
-      fontSize: '0.875rem',
-      zIndex: 10,
-      position: 'relative',
-      backgroundColor: 'rgba(5, 5, 5, 0.6)',
-      backdropFilter: 'blur(10px)',
-    }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
-        
-        {/* Contact CTA */}
+    <footer style={styles.footer}>
+      <div style={styles.inner}>
         {contactLink && (
-          <div style={{ marginBottom: '1rem' }}>
-            <Link 
-              href={contactLink}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.75rem 1.5rem',
-                background: 'rgba(56, 189, 248, 0.1)',
-                border: '1px solid rgba(56, 189, 248, 0.2)',
-                borderRadius: '9999px',
-                color: '#38bdf8',
-                fontWeight: 600,
-                textDecoration: 'none',
-                transition: 'all 0.2s'
-              }}
-            >
-              Initiate Contact Transmission
-            </Link>
-          </div>
+          <Link href={contactLink} style={styles.contact}>
+            Contact developer
+          </Link>
         )}
-
-        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <p style={{ margin: '0 0 0.5rem 0', fontWeight: 500, color: '#e2e8f0' }}>
-            {platformName} — Engineered with {techStack}.
-          </p>
-          <p style={{ margin: '0 0 1rem 0' }}>
-            Architected by <span style={{ color: '#38bdf8', fontWeight: 600 }}>{creatorName}</span>
-          </p>
+        <div style={styles.copy}>
+          <p style={styles.primary}>{platformName} · {techStack}</p>
+          <p style={styles.secondary}>Architected by <span style={styles.creator}>{creatorName}</span></p>
         </div>
-
-        <div style={{ display: 'flex', gap: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.5rem', width: '100%', justifyContent: 'center' }}>
-          <Link href="/terms" style={{ color: '#94a3b8', textDecoration: 'none' }}>Terms of Service</Link>
-          <Link href="/privacy" style={{ color: '#94a3b8', textDecoration: 'none' }}>Privacy Policy</Link>
-        </div>
+        <nav style={styles.links} aria-label="Legal">
+          <Link href="/terms" style={styles.link}>Terms of Service</Link>
+          <Link href="/privacy" style={styles.link}>Privacy Policy</Link>
+        </nav>
       </div>
     </footer>
   );
 }
+
+const styles: { [key: string]: React.CSSProperties } = {
+  footer: { marginTop: 'auto', borderTop: '1px solid #27292e', padding: '40px 24px', color: '#71717a', fontSize: 14, position: 'relative', background: '#090a0c' },
+  inner: { maxWidth: 1200, margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22 },
+  contact: { display: 'inline-flex', alignItems: 'center', padding: '10px 16px', background: '#111316', border: '1px solid #3a3d44', borderRadius: 10, color: '#f5f5f7', fontWeight: 600, textDecoration: 'none' },
+  copy: { textAlign: 'center', display: 'flex', flexDirection: 'column', gap: 5 },
+  primary: { margin: 0, fontWeight: 500, color: '#d4d4d8' },
+  secondary: { margin: 0, color: '#71717a' },
+  creator: { color: '#a1a1aa', fontWeight: 600 },
+  links: { display: 'flex', gap: 20, borderTop: '1px solid #27292e', paddingTop: 20, width: '100%', justifyContent: 'center' },
+  link: { color: '#a1a1aa', textDecoration: 'none' },
+};

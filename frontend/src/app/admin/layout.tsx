@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
  * This guard prevents the admin UI shell from being exposed to unauthenticated visitors.
  */
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const router = useRouter();
   const [checked, setChecked] = useState(false);
 
@@ -19,11 +19,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     if (!isLoading) {
       if (!isAuthenticated) {
         router.replace('/');
+      } else if (!user?.isAdmin) {
+        router.replace('/dashboard');
       } else {
         setChecked(true);
       }
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, user]);
 
   if (isLoading || !checked) {
     return (
