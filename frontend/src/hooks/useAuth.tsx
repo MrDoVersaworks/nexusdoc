@@ -32,14 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.success) {
           setAccessToken(data.data.accessToken);
 
-          // Decode user info from JWT payload
-          const payload = JSON.parse(atob(data.data.accessToken.split('.')[1]));
-
-          if (!payload.userId || !payload.email || !payload.name) {
-            throw new Error('[ERR_AUTH_INVALID_TOKEN] JWT payload missing required fields.');
-          }
-
-          setUser({ id: payload.userId, email: payload.email, name: payload.name });
+          setUser(data.data.user);
         }
       } catch {
         // No valid session — user stays unauthenticated
