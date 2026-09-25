@@ -1,0 +1,96 @@
+# NexusDoc Forensic Remediation Log
+
+## Scope and provenance
+
+This file is the durable record for the NexusDoc audit/remediation pass. The working branch is **audit-remediation** only. main remains untouched at 351dcff05c848498e577f7f71a39131a20bd6058.
+
+At the start of this pass, main and audit-remediation pointed at the same commit. That was treated as a ref-state observation, not evidence that remediation was complete.
+
+Historical sequence reconstructed from Git:
+
+- b4a8d42a5a137fe54b15e67625619e1e32d1168b — prior platform synchronization/update commit containing the audited application behavior.
+- 351dcff05c848498e577f7f71a39131a20bd6058 — documentation-only follow-up ("remove production-grade claims"); this became the common tip of main and audit-remediation.
+- The audit therefore had to be evaluated against the actual code at that baseline, not against a presumed completed remediation branch.
+- Current audit-remediation work is intentionally additive/forensic: fixes are tied to the observed contract and are not restorations of removed code merely because a finding existed.
+
+## Contract reconstruction method
+
+For every finding the remediation question was:
+
+1. Original behavior: what did the baseline actually do?
+2. Change target: what behavior was unsafe or incorrect?
+3. Preservation requirement: what user/API/storage/deployment behavior must continue?
+4. Proof of fix: what code path or test demonstrates the changed invariant?
+5. Proof of preservation: what regression/build/contract check demonstrates that unaffected behavior still resolves?
+
+Special attention was given to authentication/authorization, DTOs, route boundaries, cookies/CSRF, persistence, blob storage, AI provider contracts, migrations, configuration, CI, and deployment scheduling.
+
+## Finding disposition
+
+| Finding | Original/baseline behavior | Remediation | Preservation/proof | Status |
+|---|---|---|---|---|
+| NX-001 P0 | Authenticated document responses were cached through a process-local cache keyed too coarsely for tenant-safe semantics. | Removed the private response cache entirely. Document routes now query ownership-scoped persistence directly. | Backend build + contract tests; document DTOs remain ownership-scoped. | Fixed |
+| NX-002 P0 | Dashboard quick actions used ordinary anchors, causing full page reloads. | Converted dashboard quick actions to Next Link navigation. | Frontend lint/typecheck/build + Playwright public smoke. | Fixed |
+| NX-003 P1 | Production refresh cookie used a same-site policy that could fail for split frontend/backend deployments. | Production cookie uses SameSite=None; Secure; state-changing cookie routes require an allowed Origin. | Auth route contract is explicit; exact origins derive from CORS_ORIGIN. Real cross-domain browser integration remains deployment-specific. | Fixed in code; deployment proof pending |
+| NX-004 P1 | Refresh credentials were stored/used without one-time rotation. | New refresh material replaces the predecessor hash; conditional update prevents concurrent replay of the old hash. Legacy bcrypt refresh hashes can still be verified once and converted. | Backend build + auth implementation review. A live concurrent replay test is still pending. | Fixed in code; concurrency proof pending |
+| NX-005 P1 | Logout was coupled to access-token authentication. | Logout is cookie/refresh-token based and can run without a valid access token; refresh credential is invalidated. Access JWTs remain short-lived rather than relying on process-local revocation. | Backend build. Browser logout integration should be exercised against deployed auth. | Fixed |
+| NX-006 P0 | Uploaded documents were stored as public blobs and URLs could escape the authenticated API contract. | Blob upload is private; document DTOs expose only an authenticated download path; downloads are proxied through an ownership-checked API route. | Frontend typecheck/build verifies DTO shape; backend build verifies private download path. | Fixed |
+| NX-007 P1 | Upload failures after blob creation could orphan storage objects. | Upload failures attempt deletion and persist a storage_cleanup_tasks record if compensation itself fails. | Migration contract test verifies cleanup persistence schema; provider failure injection remains an integration-test gap. | Fixed in code; failure-injection proof pending |
+| NX-008 P1 | Failed document/account storage cleanup could lose the ability to retry. | Cleanup failures are retained as durable tasks; deletion retains the document/account when storage cleanup cannot complete; a protected cleanup endpoint and Vercel Cron provide retry. | Backend build + migration contract. Live Blob failure/retry test remains pending. | Fixed in code; provider retry proof pending |
+| NX-009 P1 | Upload validation relied too heavily on client MIME metadata. | Server validates extension, declared MIME, PDF magic bytes, and UTF-8/text binary characteristics. | Backend build; boundary helper is part of upload path. | Fixed |
+| NX-010 P1 | Embedding vectors could be silently padded/truncated to fit the database dimension. | Embedding generation now rejects any vector whose dimension differs from the configured pgvector dimension. | Backend build. Model-provider integration test remains deployment-specific. | Fixed |
+| NX-011 P1 | Embedding generation launched unbounded provider work. | Added bounded worker concurrency and retry/backoff with provider timeout. | Backend build. Load behavior against the real provider remains pending. | Fixed in code; load proof pending |
+| NX-012 P1 | Summary input was bounded while the UI/contract could imply whole-document comprehensiveness. | Summary explicitly states whether it covers the whole extracted document or only the first 30,000 characters. | Backend build; contract is visible in summary behavior. | Fixed |
+| NX-013 P2 | Document list/detail DTOs exposed heavy/sensitive fields such as storage URLs and full text unnecessarily. | List DTO is lightweight; detail DTO omits storage URL; authenticated download is a separate capability. | Frontend typecheck/build and backend DTO mapping. | Fixed |
+| NX-014 P1 | Contact intake trusted a client-side AI gate and had a client/server field mismatch. | Removed client AI-key/gatekeeper dependency. Server validates the contact contract, applies a honeypot and dedicated rate limit, persists the message, and treats persistence as authoritative. | Backend build; frontend build; no client API key is required. | Fixed |
+| NX-015 P1 | Review UI was not backed by a trustworthy moderated persistence source. | Reviews are stored in Postgres, new submissions are pending, public reads return only approved, and admin can approve/remove. Existing legacy rows are migrated to approved to preserve prior visibility. | Migration contract + frontend build + admin review surface. | Fixed |
+| NX-016 P0 | Schema contained fields/tables not represented by the committed migration history. | Added migration 0002_forensic_remediation.sql covering admin capability, case-insensitive identity uniqueness, cleanup tasks, contact/settings tables, and review status. | CI migration-contract check passes; real production DB migration must still be exercised before deployment. | Fixed in repo; deployment migration proof pending |
+| NX-017 P0 | Admin inbox frontend and backend used incompatible response/mutation shapes. | Backend now emits an explicit inbox DTO and supports the canonical PATCH /api/admin/inbox/:id contract, with a compatibility alias for the old read route. | Backend build and frontend typecheck/build. | Fixed |
+| NX-018 P1 | CI did not establish release readiness across backend/frontend/migrations/browser behavior. | CI now runs backend build, contract tests, migration-contract verification, frontend lint/typecheck/build, Chromium installation, and deterministic Playwright smoke tests on both main and audit-remediation. | GitHub Actions run 36118462523 completed successfully for both jobs. | Fixed |
+| NX-019 P1 | Next/ESLint dependency family had compatibility drift. | Aligned eslint-config-next and @next/eslint-plugin-next to Next 15.5.19 and moved flat config to explicit supported integrations. Lockfiles are synchronized. | npm ci, lint, typecheck, and production build all pass in CI. | Fixed |
+| NX-020 P1 | Access-token revocation used an in-memory/process-local blocklist that is unreliable across instances. | Removed the blocklist. Logout invalidates refresh credentials; access tokens remain short-lived and stateless. | Backend build. Multi-instance auth is no longer dependent on process-local revocation state. | Fixed |
+| NX-021 P0 | Public registration could become an admin identity through email matching. | Admin capability is persisted as users.is_admin; authorization checks the persisted privilege. An explicit operator script provisions admin by immutable user UUID. | Backend build; route authorization no longer depends on public email equality. | Fixed |
+| NX-022 P1 | Legal pages depended on a nonexistent/fallback backend legal endpoint. | Terms/privacy are now versioned static frontend content. | Playwright smoke covers both legal routes. | Fixed |
+| NX-023 P1 | Admin UI guard checked ordinary authentication rather than administrative capability. | Admin layout requires user.isAdmin; backend remains authoritative and rechecks users.is_admin for every admin route. | Frontend typecheck/build + backend authorization code. | Fixed |
+| NX-024 P1 | Contact notification could interpolate visitor-controlled content into HTML. | Notification uses plain text and server-controlled subject/from/to configuration. | Backend build; no visitor HTML interpolation remains. | Fixed |
+| NX-025 P1 | Production frontend could silently invent a backend origin from localhost/browser hostname fallback. | Production build now fails if NEXT_PUBLIC_API_URL is absent; localhost fallback remains development-only. | CI production build passes with an explicit CI API URL. | Fixed |
+| NX-026 P1 | Refresh/auth failures could resolve through a success-shaped response. | Refresh failures return HTTP 401 and clear the refresh cookie; client consumes the authoritative user DTO from successful refresh. | Backend/frontend build and auth contract implementation. | Fixed |
+| NX-027 P1 | Document IDs did not have one consistent route-boundary UUID validation contract. | Added reusable uuidParamSchema and applied it to document/admin resource routes. | Four backend contract tests plus backend build. | Fixed |
+| NX-028 P1 | Review UI used local state/client assumptions instead of moderated persisted review truth. | Frontend reads approved reviews from the backend and submits to the persisted moderation queue; admin has an explicit moderation page. | Frontend build + backend contract tests. | Fixed |
+
+## Tests and evidence
+
+The final CI run used for this pass was GitHub Actions run 36118462523 at commit 1d9a9fe3c4c206dbb7d22c6c34f854f6afc5ee6c.
+
+Passing evidence from that run:
+
+- Backend npm ci: passed.
+- Backend TypeScript build: passed.
+- Backend contract tests: 4/4 passed.
+- Migration contract verification: passed.
+- Frontend npm ci: passed.
+- Frontend ESLint: passed.
+- Frontend TypeScript check: passed.
+- Frontend production build: passed.
+- Chromium installation: passed.
+- Public Playwright smoke: passed for /, /login, /register, /terms, and /privacy.
+
+Earlier failed CI runs were retained as forensic evidence rather than hidden:
+
+- Initial remediation exposed lockfile drift.
+- CI then exposed backend type errors, frontend lint errors, and migration-check incompatibility.
+- Each failure was corrected on audit-remediation before the final passing run.
+
+## Uncertainty / deployment-only checks
+
+Repository-level CI does not prove live integrations that require production credentials or external services. Before production promotion, the following should be exercised against the real deployment:
+
+- Neon/Postgres migration 0002_forensic_remediation.sql on a backup/staging database, including the intentional case-collision guard.
+- Vercel Blob private upload/download/delete and forced deletion failure/retry.
+- Gemini embedding model dimension against the configured production model.
+- Concurrent refresh-token replay against the deployed API.
+- Cross-site frontend/backend cookie + CORS behavior with the actual production origins.
+- Resend notification delivery and plain-text rendering.
+- Vercel Cron invocation of /api/internal/storage-cleanup with CRON_SECRET.
+
+No code on main was modified during this pass.
