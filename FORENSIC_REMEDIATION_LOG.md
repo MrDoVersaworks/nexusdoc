@@ -60,7 +60,7 @@ Special attention was given to authentication/authorization, DTOs, route boundar
 
 ## Tests and evidence
 
-The final CI run used for this pass was GitHub Actions run 36118462523 at commit 1d9a9fe3c4c206dbb7d22c6c34f854f6afc5ee6c.
+The final CI run used for this pass was GitHub Actions run 36118679496 at commit 2a8773f9c0705efa2e9e561d9b78fcf68a7cb1d4.
 
 Passing evidence from that run:
 
