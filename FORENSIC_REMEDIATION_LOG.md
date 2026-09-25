@@ -183,3 +183,21 @@ The failed run 36120337415 is retained in GitHub history as forensic evidence of
 Current branch comparison is now 98 commits ahead of `main` and 0 behind. `main` remains at `351dcff05c848498e577f7f71a39131a20bd6058`.
 
 The next step remains targeted runtime/integration proof rather than additional speculative source changes.
+
+
+## UI polish checkpoint — 2026-09-25
+
+A presentation-only polish pass was applied to the frontend. No route, API, authentication, persistence, state-management, or user-flow behavior was intentionally changed.
+
+Design intent:
+
+- Replace the previous high-glow / gradient-heavy visual language with a restrained, Apple-like interface: neutral surfaces, clear hierarchy, compact borders, modest shadows, and the existing purple team accent used selectively.
+- Remove decorative scanner/grid/ambient effects from the public landing page rather than adding new motion or visual complexity.
+- Remove gradient-filled primary controls and excessive hover transforms while preserving the existing controls and links.
+- Tighten typography, spacing, cards, form fields, navigation, footer, contact modal, and review presentation.
+- Keep responsive breakpoints and existing component/class contracts intact.
+- Avoid em-dash punctuation in newly written UI copy.
+
+Files changed are presentation-only: global design tokens, landing-page styles, auth styles, dashboard overview styles, public review presentation, contact modal presentation, and footer presentation.
+
+Proof requirement remains the same as every other remediation: the full frontend lint/typecheck/build and Playwright smoke suite must pass after the visual changes. Vercel preview deployment must also be inspected before this checkpoint is closed.
