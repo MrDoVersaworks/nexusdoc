@@ -6,9 +6,10 @@ import { toast } from 'sonner';
 import { Settings, Shield } from 'lucide-react';
 
 interface GlobalSettings {
-  [key: string]: any;
-  google_analytics_id: string;
-  termly_uuid: string;
+  google_analytics_id: string | null;
+  termly_uuid: string | null;
+  privacy_policy_content?: string | null;
+  terms_of_service_content?: string | null;
 }
 
 export default function AdminSettingsPage() {
@@ -21,7 +22,7 @@ export default function AdminSettingsPage() {
       try {
         const res = await apiRequest<{ data: GlobalSettings }>({ method: 'GET', path: '/api/admin/settings' });
         setSettings(res.data || { google_analytics_id: '', termly_uuid: '' });
-      } catch (err) {
+      } catch {
         toast.error('Failed to load settings');
       } finally {
         setLoading(false);
@@ -36,7 +37,7 @@ export default function AdminSettingsPage() {
     try {
       await apiRequest({ method: 'PUT', path: '/api/admin/settings', body: settings });
       toast.success('Global settings updated successfully');
-    } catch (err) {
+    } catch {
       toast.error('Failed to save settings');
     } finally {
       setSaving(false);
