@@ -26,7 +26,6 @@ export const users = pgTable('users', {
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
-
 export const refreshTokens = pgTable('refresh_tokens', {
   id: uuid('id').defaultRandom().primaryKey(),
   user_id: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
@@ -35,7 +34,6 @@ export const refreshTokens = pgTable('refresh_tokens', {
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
-
 export const documents = pgTable('documents', {
   id: uuid('id').defaultRandom().primaryKey(),
   user_id: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
@@ -49,7 +47,6 @@ export const documents = pgTable('documents', {
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
-
 export const documentChunks = pgTable('document_chunks', {
   id: uuid('id').defaultRandom().primaryKey(),
   document_id: uuid('document_id').notNull().references(() => documents.id, { onDelete: 'cascade' }),
@@ -63,7 +60,16 @@ export const documentChunks = pgTable('document_chunks', {
   docIdIdx: index('dc_document_id_idx').on(table.document_id),
   userIdIdx: index('dc_user_id_idx').on(table.user_id),
 }));
-
+export const storageCleanupTasks = pgTable('storage_cleanup_tasks', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  blob_url: text('blob_url').notNull(),
+  user_id: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  reason: varchar('reason', { length: 100 }).notNull(),
+  attempts: integer('attempts').notNull().default(0),
+  last_error: text('last_error'),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
 export const contactMessages = pgTable('contact_messages', {
   id: uuid('id').defaultRandom().primaryKey(),
   sender_name: varchar('sender_name', { length: 255 }).notNull(),
@@ -73,7 +79,6 @@ export const contactMessages = pgTable('contact_messages', {
   ai_screening_passed: boolean('ai_screening_passed').notNull().default(false),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
-
 export const systemSettings = pgTable('system_settings', {
   id: uuid('id').defaultRandom().primaryKey(),
   google_analytics_id: varchar('google_analytics_id', { length: 50 }),
@@ -82,7 +87,6 @@ export const systemSettings = pgTable('system_settings', {
   terms_of_service_content: text('terms_of_service_content'),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
-
 export const platformReviews = pgTable('platform_reviews', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -93,19 +97,9 @@ export const platformReviews = pgTable('platform_reviews', {
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
-
-export const usersRelations = relations(users, ({ many }) => ({
-  refreshTokens: many(refreshTokens),
-  documents: many(documents),
-  documentChunks: many(documentChunks),
-}));
-export const refreshTokensRelations = relations(refreshTokens, ({ one }) => ({
-  user: one(users, { fields: [refreshTokens.user_id], references: [users.id] }),
-}));
-export const documentsRelations = relations(documents, ({ one, many }) => ({
-  user: one(users, { fields: [documents.user_id], references: [users.id] }),
-  chunks: many(documentChunks),
-}));
+export const usersRelations = relations(users, ({ many }) => ({ refreshTokens: many(refreshTokens), documents: many(documents), documentChunks: many(documentChunks) }));
+export const refreshTokensRelations = relations(refreshTokens, ({ one }) => ({ user: one(users, { fields: [refreshTokens.user_id], references: [users.id] }) }));
+export const documentsRelations = relations(documents, ({ one, many }) => ({ user: one(users, { fields: [documents.user_id], references: [users.id] }), chunks: many(documentChunks) }));
 export const documentChunksRelations = relations(documentChunks, ({ one }) => ({
   document: one(documents, { fields: [documentChunks.document_id], references: [documents.id] }),
   user: one(users, { fields: [documentChunks.user_id], references: [users.id] }),
