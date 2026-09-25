@@ -7,6 +7,18 @@ export function setAccessToken(token: string): void { accessToken = token; }
 export function clearAccessToken(): void { accessToken = null; }
 export function getAccessToken(): string | null { return accessToken; }
 
+export class ApiRequestError extends Error {
+  public readonly code: string;
+  public readonly status: number;
+
+  constructor(message: string, code: string, status: number) {
+    super(message);
+    this.name = 'ApiRequestError';
+    this.code = code;
+    this.status = status;
+  }
+}
+
 interface RequestOptions {
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   path: string;
@@ -44,7 +56,16 @@ export async function apiRequest<T>(options: RequestOptions): Promise<T> {
   else if (body) { headers['Content-Type'] = 'application/json'; fetchBody = JSON.stringify(body); }
 
   const response = await authorizedFetch(path, { method, headers, body: fetchBody }, requiresAuth);
-  const data = await response.json();
+  const data = await response.json().catch(() => null) as ApiResponse<unknown> | null;
+
+  if (!response.ok) {
+    const message = data && !data.success
+      ? data.error.message
+      : 'The server could not complete your request. Please try again.';
+    const code = data && !data.success ? data.error.code : 'ERR_HTTP_REQUEST_FAILED';
+    throw new ApiRequestError(message, code, response.status);
+  }
+
   return data as T;
 }
 
