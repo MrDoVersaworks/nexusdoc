@@ -1,14 +1,18 @@
 import type { NextFunction, Request, Response } from 'express';
 import { allowedOrigins, config } from '../config';
 
+export function isAllowedOrigin(origin: string | undefined): boolean {
+  const normalized = origin?.trim().replace(/\/+$/, '');
+  return Boolean(normalized && allowedOrigins.includes(normalized));
+}
+
 export function originGuard(req: Request, res: Response, next: NextFunction): void {
-  const origin = req.headers.origin?.trim().replace(/\/+$/, '');
-  if (origin && allowedOrigins.includes(origin)) {
+  if (isAllowedOrigin(req.headers.origin)) {
     next();
     return;
   }
 
-  if (!origin && config.NODE_ENV !== 'production') {
+  if (!req.headers.origin && config.NODE_ENV !== 'production') {
     next();
     return;
   }
