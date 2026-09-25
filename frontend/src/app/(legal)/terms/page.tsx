@@ -1,16 +1,35 @@
+import Link from 'next/link';
+import styles from '../legal.module.css';
+
+const updated = 'September 25, 2026';
+
 export default function TermsOfServicePage() {
   return (
-    <div className="min-h-screen bg-[#04071a] text-[#94a3b8] p-8 pt-24">
-      <div className="max-w-4xl mx-auto py-12 space-y-8">
-        <h1 className="text-4xl font-bold mb-8 text-white">Terms of Service</h1>
-        <p className="text-sm text-[#64748b]">Version 1.0.0 · Last updated: July 2026</p>
-        <section className="space-y-4"><h2 className="text-2xl font-semibold text-white">1. Acceptance of Terms</h2><p>By accessing or using NexusDoc, you agree to be bound by these Terms of Service. If you do not agree, you may not use the platform.</p></section>
-        <section className="space-y-4"><h2 className="text-2xl font-semibold text-white">2. Account Responsibilities</h2><p>You are responsible for maintaining the security of your account credentials and API keys. You must not share your password or allow unauthorized access to your account.</p></section>
-        <section className="space-y-4"><h2 className="text-2xl font-semibold text-white">3. Document & AI Usage</h2><p>NexusDoc provides document intelligence and semantic search capabilities as a portfolio demonstration. AI-generated summaries and search results are not guaranteed to be accurate and should be verified independently.</p></section>
-        <section className="space-y-4"><h2 className="text-2xl font-semibold text-white">4. Intellectual Property</h2><p>You retain all rights to documents and content you upload to NexusDoc. The NexusDoc platform, its design, code, and branding are the intellectual property of the developer.</p></section>
-        <section className="space-y-4"><h2 className="text-2xl font-semibold text-white">5. Limitation of Liability</h2><p>NexusDoc is provided "as is" without warranties of any kind. In no event shall the developer be liable for any indirect, incidental, or consequential damages arising from your use of the platform.</p></section>
-        <section className="space-y-4"><h2 className="text-2xl font-semibold text-white">6. Contact</h2><p>For questions about these terms, please use the contact form provided by the portfolio site.</p></section>
+    <main className={styles.legalPage}>
+      <div className={styles.legalShell}>
+        <Link href="/" className={styles.backLink}>← Back to NexusDoc</Link>
+        <header className={styles.hero}>
+          <div className={styles.eyebrow}>NexusDoc · Agreement</div>
+          <h1 className={styles.title}>Terms of Service</h1>
+          <p className={styles.intro}>These terms set the ground rules for using NexusDoc, including your account, uploaded material, AI features, security responsibilities, and the limits of the service.</p>
+          <div className={styles.meta}><span>Effective: {updated}</span><span>Version 2.0</span></div>
+        </header>
+        <article className={styles.content}>
+          <section className={styles.section}><h2>1. Acceptance</h2><p>By creating an account or using NexusDoc, you agree to these Terms and the Privacy Policy. If you do not agree, do not use the service.</p></section>
+          <section className={styles.section}><h2>2. Your account</h2><p>You are responsible for the accuracy of the information you provide and for protecting your password, sessions, and AI credentials. Do not share your password or deliberately allow another person to use your account.</p></section>
+          <section className={styles.section}><h2>3. Documents and content</h2><p>You retain the rights you already have in documents and other material you upload. You represent that you have the necessary rights and permissions to upload and process that material. NexusDoc receives the limited permissions needed to store, extract, index, retrieve, and process your content to provide the requested features.</p></section>
+          <section className={styles.section}><h2>4. AI features and results</h2><p>AI summaries, embeddings, and search results are generated using configured AI services and may contain errors, omissions, or interpretations that require verification. They are assistance tools, not professional legal, medical, financial, compliance, or other expert advice.</p><div className={styles.callout}>Review important AI-generated results before relying on them, publishing them, or making decisions based on them.</div></section>
+          <section className={styles.section}><h2>5. Bring Your Own Key</h2><p>NexusDoc may require you to provide your own Gemini API key for AI features. You are responsible for that key, the account or billing arrangement behind it, and your use of the applicable provider&apos;s services. NexusDoc does not guarantee a third-party provider&apos;s availability, pricing, quotas, or model behavior.</p></section>
+          <section className={styles.section}><h2>6. Acceptable use</h2><p>You must not use NexusDoc to:</p><ul><li>upload or process material you do not have permission to use;</li><li>attempt to access another user&apos;s account, documents, credentials, or private data;</li><li>circumvent security controls, rate limits, or access restrictions;</li><li>introduce malicious code or intentionally abuse the service or its infrastructure; or</li><li>use the service in a way that violates applicable law or the rights of others.</li></ul></section>
+          <section className={styles.section}><h2>7. Availability and changes</h2><p>NexusDoc may experience maintenance, provider outages, quota limitations, or other interruptions. Features may be changed, improved, suspended, or retired as the product evolves. We will make reasonable efforts to keep the service understandable when an operation cannot be completed.</p></section>
+          <section className={styles.section}><h2>8. Account and content deletion</h2><p>You may delete documents and request account deletion through the available application controls. Deletion can take additional time where storage cleanup, backups, or other technical processes must complete.</p></section>
+          <section className={styles.section}><h2>9. Intellectual property</h2><p>NexusDoc&apos;s software, interface, branding, and original platform materials remain owned by their respective rights holders. These terms do not transfer ownership of the platform to you, and they do not transfer ownership of your own content to NexusDoc.</p></section>
+          <section className={styles.section}><h2>10. Disclaimers and liability</h2><p>To the extent permitted by applicable law, NexusDoc is not responsible for losses caused by your reliance on unverified AI output, your misuse of the service, content you were not authorized to upload, or failures of third-party services outside NexusDoc&apos;s control.</p></section>
+          <section className={styles.section}><h2>11. Changes to these terms</h2><p>We may revise these terms as the service changes. The effective date on this page identifies the current version. Continued use after an updated version becomes effective means you accept the revised terms to the extent permitted by law.</p></section>
+          <section className={styles.section}><h2>12. Contact</h2><p>Questions about these terms can be sent through the NexusDoc contact form available from the application.</p></section>
+        </article>
+        <p className={styles.footerNote}>NexusDoc · Terms of Service · Last updated {updated}</p>
       </div>
-    </div>
+    </main>
   );
 }
