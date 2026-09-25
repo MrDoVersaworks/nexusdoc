@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { del } from '@vercel/blob';
 import { db } from '../db/connection';
 import { users, refreshTokens, documents } from '../db/schema';
@@ -94,7 +94,7 @@ export async function refreshAccessToken(refreshTokenValue: string): Promise<Log
   const nextRawToken = makeRefreshToken();
   const rotated = await db.update(refreshTokens).set({
     token_hash: hashRefreshToken(nextRawToken), expires_at: refreshExpiry(), updated_at: new Date(),
-  }).where(eq(refreshTokens.id, tokenId)).returning({ id: refreshTokens.id });
+  }).where(and(eq(refreshTokens.id, tokenId), eq(refreshTokens.token_hash, storedToken.token_hash))).returning({ id: refreshTokens.id });
   if (rotated.length === 0) throw new Error(`[${ErrorCode.AUTH_REFRESH_FAILED}] Refresh token was already rotated.`);
   return {
     accessToken: makeAccessToken(user), refreshToken: `${tokenId}.${nextRawToken}`,
