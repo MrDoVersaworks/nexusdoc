@@ -62,6 +62,7 @@ app.use('/api/public', publicRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/internal/storage-cleanup', storageCleanupRoutes);
 
 // ============================================================
 // 404 HANDLER
