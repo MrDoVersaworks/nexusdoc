@@ -130,3 +130,33 @@ The repository-level CI evidence recorded above remains the latest verified full
 4. Run the complete backend/frontend build, migration checks, and browser smoke suite again after the targeted fixes.
 5. Inspect Vercel deployment configuration and, where credentials/connection permit, validate the deployed runtime behavior separately from repository CI.
 6. Only then close findings and record residual uncertainty.
+
+
+## Infrastructure and deployment checkpoint — 2026-09-25
+
+The deployment topology was verified against the connected Vercel account rather than inferred from repository files:
+
+- Vercel has two separate NexusDoc projects: `nexusdoc` (Next.js frontend) and `nexusdoc-nzih` (Express backend).
+- Both projects currently report `live: false`; their current audit-remediation deployments are preview deployments, not production promotion.
+- The backend project is configured as an Express Vercel deployment and its latest verified deployment was commit `0316e2d1819a90ef585be8aa5d537e86b49f91a2`, state READY.
+- The frontend project is configured as Next.js and its latest verified audit-remediation deployment was commit `9b11c45814b327485c8a8914eee94f7439de5343`, state READY.
+- The current branch tip is `cbdcc2267fea3cd23d2627fb1296a8cd984c38db`, whose parent is `0316e2d1819a90ef585be8aa5d537e86b49f91a2`. Therefore the current code tip is ahead of the last verified backend deployment by a documentation-only checkpoint, not by an unverified code change.
+- The last verified backend deployment build completed successfully on Vercel. The build logs show the repository's `backend/vercel.json` is active and that Vercel built the Express application.
+- The deployed backend `/health` endpoint returned HTTP 200 and security headers. Its response included `Access-Control-Allow-Origin: https://nexusdoc.vercel.app` and `Access-Control-Allow-Credentials: true`, demonstrating that the deployed CORS configuration is not wildcard-based and is aligned with the production frontend origin observed in the deployment.
+- Vercel runtime-error inspection for the frontend audit-remediation deployment returned no runtime error clusters for the checked seven-day window; the deployment-specific runtime log query returned no entries. This is absence-of-observed-errors evidence, not proof of functional completeness.
+- The backend deployment's `vercel.json` declares a daily cron for `/api/internal/storage-cleanup`. The handler checks `Authorization: Bearer <CRON_SECRET>`, matching Vercel's documented secure-cron pattern. The current audit-remediation deployment is preview/non-production, so cron activation and end-to-end cleanup execution are still not proven from the preview deployment.
+- Direct access to preview backend API routes is protected by the Vercel deployment access layer in this environment. This prevented unauthenticated black-box execution of the public API through the preview URL; `/health` was independently reachable and verified. This distinction is recorded rather than treating the preview access layer as application behavior.
+
+### Deployment conclusion
+
+The public-origin/CORS configuration is no longer an unresolved source-code-only question: the deployed backend observed in Vercel emits the expected production frontend origin and credential allowance. However, the complete split-origin browser proof remains open because the deployed preview is behind Vercel access protection and no production promotion has been performed during remediation. The remediation branch remains isolated from `main`.
+
+### Remaining high-value proof work
+
+1. Add/execute targeted contract tests for origin allow/deny behavior and cleanup authorization without requiring production credentials.
+2. Exercise the real deployed auth refresh rotation concurrently against a staging/controlled account.
+3. Exercise ownership isolation and private Blob access with two controlled users.
+4. Exercise review pending -> approved -> public visibility transitions through the real API/database.
+5. Exercise forced Blob deletion failure and verify durable cleanup retry.
+6. Validate migration 0002 against a staging/backup database before any production promotion.
+7. Re-run the full repository CI after any further code/test changes, then separately verify the resulting deployment commit in Vercel.
