@@ -48,53 +48,76 @@ export function PlatformReviews() {
   };
 
   return (
-    <div style={{ padding: '4rem 2rem', maxWidth: 1000, margin: '0 auto' }}>
-      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-        <h2 style={{ fontSize: '2.25rem', fontWeight: 'bold', color: '#fff' }}>NexusDoc <span style={{ color: '#06b6d4' }}>App Experience &amp; Reviews</span></h2>
-        <p style={{ color: '#94a3b8', fontSize: '.95rem' }}>Share your experience using NexusDoc for document intelligence, AI summarization, and vector search.</p>
+    <section style={styles.section} aria-labelledby="reviews-title">
+      <div style={styles.heading}>
+        <h2 id="reviews-title" style={styles.title}>NexusDoc <span style={styles.accent}>reviews</span></h2>
+        <p style={styles.subtitle}>Share your experience with document intelligence, AI summarization, and vector search.</p>
       </div>
 
       {reviews.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+        <div style={styles.reviewGrid}>
           {reviews.map((review) => (
-            <div key={review.id} style={{ background: 'rgba(255,255,255,.03)', border: '1px solid rgba(6,182,212,.2)', borderRadius: 16, padding: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ color: '#fbbf24' }}>{'★'.repeat(review.rating)}</span>
-                {review.createdAt && <span style={{ fontSize: 12, color: '#64748b' }}>{new Date(review.createdAt).toLocaleDateString()}</span>}
+            <article key={review.id} style={styles.reviewCard}>
+              <div style={styles.reviewMeta}>
+                <span style={styles.stars} aria-label={`${review.rating} out of 5 stars`}>{'★'.repeat(review.rating)}</span>
+                {review.createdAt && <time style={styles.date}>{new Date(review.createdAt).toLocaleDateString()}</time>}
               </div>
-              <p style={{ color: '#e2e8f0', fontStyle: 'italic', lineHeight: 1.5 }}>“{review.feedback}”</p>
-              <div style={{ marginTop: 12, color: '#fff', fontWeight: 700 }}>{review.name} <span style={{ color: '#06b6d4', fontWeight: 400 }}>• {review.profession}</span></div>
-            </div>
+              <p style={styles.feedback}>“{review.feedback}”</p>
+              <div style={styles.reviewer}>{review.name}{review.profession && <span style={styles.profession}> · {review.profession}</span>}</div>
+            </article>
           ))}
         </div>
       )}
 
-      <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-        style={{ background: 'rgba(5,5,5,.6)', border: '1px solid rgba(6,182,212,.2)', borderRadius: 20, padding: 32, maxWidth: 650, margin: '0 auto' }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+        style={styles.formCard}>
         {submitted ? (
-          <div style={{ textAlign: 'center', color: '#fff' }}>
-            <h3 style={{ fontSize: 20, fontWeight: 700 }}>Review submitted</h3>
-            <p style={{ color: '#94a3b8' }}>Thanks. Your review is awaiting moderation and will appear here if approved.</p>
-            <button onClick={() => setSubmitted(false)} style={{ marginTop: 12, background: 'transparent', color: '#06b6d4', border: '1px solid rgba(6,182,212,.3)', padding: '8px 14px', borderRadius: 8 }}>Write Another Review</button>
+          <div style={styles.success}>
+            <h3 style={styles.formTitle}>Review submitted</h3>
+            <p style={styles.formCopy}>Thanks. Your review is awaiting moderation and will appear here if approved.</p>
+            <button onClick={() => setSubmitted(false)} style={styles.secondaryButton}>Write another review</button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#fff', textAlign: 'center' }}>Submit NexusDoc Usage Review</h3>
-            {errorMsg && <div style={{ color: '#f87171', fontSize: 13, textAlign: 'center' }}>{errorMsg}</div>}
-            <input required maxLength={255} placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={styles.input} />
-            <input maxLength={255} placeholder="Role / Profession" value={form.profession} onChange={(e) => setForm({ ...form, profession: e.target.value })} style={styles.input} />
-            <div style={{ display: 'flex', gap: 6 }}>{[1,2,3,4,5].map((star) => <button type="button" key={star} onClick={() => setForm({ ...form, rating: star })} style={{ background: 'none', border: 0, cursor: 'pointer', fontSize: 20, color: star <= form.rating ? '#fbbf24' : '#475569' }}>★</button>)}</div>
-            <textarea required rows={4} maxLength={2000} placeholder="How was your experience?" value={form.feedback} onChange={(e) => setForm({ ...form, feedback: e.target.value })} style={styles.textarea} />
-            <button type="submit" disabled={isSubmitting} style={styles.button}>{isSubmitting ? 'Submitting...' : 'Submit Review'}</button>
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <div>
+              <h3 style={styles.formTitle}>Share your experience</h3>
+              <p style={styles.formCopy}>Your review will be published after moderation.</p>
+            </div>
+            {errorMsg && <div role="alert" style={styles.error}>{errorMsg}</div>}
+            <input required maxLength={255} placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <input maxLength={255} placeholder="Role / profession" value={form.profession} onChange={(e) => setForm({ ...form, profession: e.target.value })} />
+            <div style={styles.rating} aria-label="Choose a rating">{[1,2,3,4,5].map((star) => <button type="button" key={star} onClick={() => setForm({ ...form, rating: star })} aria-label={`${star} star`} style={{ ...styles.starButton, color: star <= form.rating ? '#ffb340' : '#52525b' }}>★</button>)}</div>
+            <textarea required rows={4} maxLength={2000} placeholder="How was your experience?" value={form.feedback} onChange={(e) => setForm({ ...form, feedback: e.target.value })} />
+            <button type="submit" disabled={isSubmitting} style={styles.primaryButton}>{isSubmitting ? 'Submitting…' : 'Submit review'}</button>
           </form>
         )}
       </motion.div>
-    </div>
+    </section>
   );
 }
 
 const styles: { [key: string]: React.CSSProperties } = {
-  input: { width: '100%', background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 8, padding: '10px 12px', color: '#fff' },
-  textarea: { width: '100%', background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 8, padding: '10px 12px', color: '#fff', resize: 'vertical' },
-  button: { background: '#06b6d4', color: '#0f172a', fontWeight: 700, padding: '12px 20px', borderRadius: 8, border: 0, cursor: 'pointer' },
+  section: { padding: '72px 24px', maxWidth: 1040, margin: '0 auto' },
+  heading: { textAlign: 'center', marginBottom: 40 },
+  title: { fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontWeight: 700, letterSpacing: '-.04em', color: '#f5f5f7', marginBottom: 8 },
+  accent: { color: '#6c5ce7' },
+  subtitle: { color: '#a1a1aa', fontSize: '.95rem', maxWidth: 640, margin: '0 auto', lineHeight: 1.6 },
+  reviewGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%,280px),1fr))', gap: 12, marginBottom: 24 },
+  reviewCard: { background: '#111316', border: '1px solid #27292e', borderRadius: 14, padding: 22 },
+  reviewMeta: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 14 },
+  stars: { color: '#ffb340', letterSpacing: 1, fontSize: 14 },
+  date: { fontSize: 12, color: '#71717a' },
+  feedback: { color: '#d4d4d8', lineHeight: 1.6, marginBottom: 16 },
+  reviewer: { color: '#f5f5f7', fontWeight: 600, fontSize: 14 },
+  profession: { color: '#71717a', fontWeight: 400 },
+  formCard: { background: '#111316', border: '1px solid #27292e', borderRadius: 16, padding: '28px', maxWidth: 620, margin: '0 auto', boxShadow: '0 12px 32px rgba(0,0,0,.16)' },
+  form: { display: 'flex', flexDirection: 'column', gap: 14 },
+  formTitle: { fontSize: 18, fontWeight: 600, color: '#f5f5f7', marginBottom: 4 },
+  formCopy: { color: '#a1a1aa', fontSize: 13, lineHeight: 1.5 },
+  rating: { display: 'flex', gap: 2 },
+  starButton: { background: 'none', border: 0, cursor: 'pointer', fontSize: 22, lineHeight: 1, padding: 4 },
+  primaryButton: { background: '#6c5ce7', color: '#fff', fontWeight: 600, padding: '12px 18px', borderRadius: 10, border: 0, cursor: 'pointer' },
+  secondaryButton: { marginTop: 16, background: 'transparent', color: '#a1a1aa', border: '1px solid #3a3d44', padding: '9px 14px', borderRadius: 10, cursor: 'pointer' },
+  error: { color: '#ff453a', background: 'rgba(255,69,58,.08)', border: '1px solid rgba(255,69,58,.2)', padding: '9px 12px', borderRadius: 9, fontSize: 13 },
+  success: { textAlign: 'center' },
 };
