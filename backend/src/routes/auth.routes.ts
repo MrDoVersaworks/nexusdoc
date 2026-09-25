@@ -17,7 +17,7 @@ function refreshCookieOptions() {
   return {
     httpOnly: true,
     secure: config.NODE_ENV === 'production',
-    sameSite: (config.NODE_ENV === 'production' ? 'none' : 'lax') as const,
+    sameSite: config.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
     path: '/',
   };
