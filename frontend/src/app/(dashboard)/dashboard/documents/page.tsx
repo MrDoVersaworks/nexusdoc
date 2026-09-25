@@ -3,13 +3,13 @@
 import { useState, useEffect, useCallback, type FormEvent, type ChangeEvent } from 'react';
 import { toast } from 'sonner';
 import { apiRequest } from '@/lib/api';
-import type { ApiResponse, Document, PaginationMeta } from '@/types';
+import type { ApiResponse, DocumentListItem, PaginationMeta } from '@/types';
 import { ACCEPTED_FILE_TYPES, MAX_FILE_SIZE_MB, MAX_FILE_SIZE_BYTES, DEFAULT_PAGE_SIZE, MAX_SUMMARY_DISPLAY_LENGTH } from '@/constants';
 import styles from './documents.module.css';
 
 interface DocumentsSuccessResponse {
   success: true;
-  data: Document[];
+  data: DocumentListItem[];
   pagination: PaginationMeta;
 }
 
@@ -21,7 +21,7 @@ interface DocumentsErrorResponse {
 type DocumentsApiResponse = DocumentsSuccessResponse | DocumentsErrorResponse;
 
 export default function DocumentsPage() {
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documents, setDocuments] = useState<DocumentListItem[]>([]);
   const [pagination, setPagination] = useState<PaginationMeta | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,7 +34,7 @@ export default function DocumentsPage() {
   const [isUploading, setIsUploading] = useState(false);
 
   // Delete confirmation state
-  const [deleteTarget, setDeleteTarget] = useState<Document | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DocumentListItem | null>(null);
 
   const fetchDocuments = useCallback(async (pageNum: number) => {
     setIsLoading(true);
@@ -89,7 +89,7 @@ export default function DocumentsPage() {
       formData.append('title', uploadTitle);
       formData.append('file', uploadFile);
 
-      const data = await apiRequest<ApiResponse<Document>>({
+      const data = await apiRequest<ApiResponse<DocumentListItem>>({
         method: 'POST',
         path: '/api/documents',
         body: formData,
