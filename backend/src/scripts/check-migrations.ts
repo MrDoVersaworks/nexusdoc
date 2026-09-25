@@ -23,7 +23,23 @@ async function main() {
     if (!schema.includes(required)) throw new Error(`Schema is missing required contract: ${required}`);
   }
 
-  console.log(`Migration contract verified: ${files.join(', ')}`);
+  const vercelConfig = JSON.parse(
+    await readFile(join(process.cwd(), 'vercel.json'), 'utf8'),
+  ) as { framework?: string; buildCommand?: string; builds?: unknown };
+
+  if (vercelConfig.framework !== 'express') {
+    throw new Error('Vercel deployment must use the Express framework preset.');
+  }
+
+  if (!vercelConfig.buildCommand?.includes('npm run db:migrate')) {
+    throw new Error('Vercel production build must execute npm run db:migrate.');
+  }
+
+  if (vercelConfig.builds !== undefined) {
+    throw new Error('Legacy Vercel builds configuration must not be present because it bypasses buildCommand.');
+  }
+
+  console.log(`Migration/deployment contract verified: ${files.join(', ')}`);
 }
 
 main().catch((error) => {
