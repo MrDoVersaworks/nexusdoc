@@ -29,3 +29,24 @@ test('UUID route contract rejects arbitrary identifiers', () => {
 test('document title contract rejects blank titles', () => {
   assert.equal(documentUploadSchema.safeParse({ title: '   ' }).success, false);
 });
+
+import { ErrorCode } from './constants/index.js';
+import { getClientErrorDetails } from './middleware/errorHandler.js';
+
+test('AI quota errors map to an actionable 429 response', () => {
+  const result = getClientErrorDetails(ErrorCode.AI_QUOTA_EXCEEDED);
+  assert.equal(result?.statusCode, 429);
+  assert.match(result?.message ?? '', /usage limit|quota|billing/i);
+});
+
+test('AI credential errors map to an actionable settings response', () => {
+  const result = getClientErrorDetails(ErrorCode.AI_AUTH_FAILED);
+  assert.equal(result?.statusCode, 422);
+  assert.match(result?.message ?? '', /API key|Settings/i);
+});
+
+test('AI provider outages map to a retryable 503 response', () => {
+  const result = getClientErrorDetails(ErrorCode.AI_PROVIDER_UNAVAILABLE);
+  assert.equal(result?.statusCode, 503);
+  assert.match(result?.message ?? '', /temporarily unavailable|try again/i);
+});
