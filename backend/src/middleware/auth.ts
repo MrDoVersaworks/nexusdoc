@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { jwtBlocklist } from '../utils/blocklist';
 import { config } from '../config';
 import { ErrorCode } from '../constants';
 import type { JwtAccessPayload, ApiErrorResponse } from '../types';
@@ -18,11 +17,6 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   }
   const token = parts[1];
   try {
-    const signature = token.split('.')[2];
-    if (signature && jwtBlocklist.has(signature)) {
-      res.status(401).json({ success: false, error: { code: ErrorCode.AUTH_TOKEN_INVALID, message: 'Session invalidated. Please log in again.' } });
-      return;
-    }
     const decoded = jwt.verify(token, config.JWT_ACCESS_SECRET) as JwtAccessPayload;
     req.userId = decoded.userId;
     req.userEmail = decoded.email;
