@@ -6,6 +6,21 @@ const AI_TIMEOUT_MS = 30_000;
 const EMBEDDING_CONCURRENCY = 4;
 const EMBEDDING_RETRIES = 2;
 
+function providerErrorCode(error: unknown): ErrorCode {
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+
+  if (/(quota|rate limit|resource exhausted|too many requests|429)/i.test(message)) {
+    return ErrorCode.AI_QUOTA_EXCEEDED;
+  }
+  if (/(api key|unauthenticated|unauthorized|permission denied|forbidden|401|403)/i.test(message)) {
+    return ErrorCode.AI_AUTH_FAILED;
+  }
+  if (/(fetch failed|network|econn|enotfound|timeout|timed out|service unavailable|503|502|500)/i.test(message)) {
+    return ErrorCode.AI_PROVIDER_UNAVAILABLE;
+  }
+  return ErrorCode.AI_PROCESSING_FAILED;
+}
+
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
@@ -23,8 +38,9 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T
 async function withRetry<T>(operation: () => Promise<T>, attempts: number): Promise<T> {
   let lastError: unknown;
   for (let attempt = 0; attempt <= attempts; attempt += 1) {
-    try { return await withTimeout(operation(), AI_TIMEOUT_MS); }
-    catch (error) {
+    try {
+      return await withTimeout(operation(), AI_TIMEOUT_MS);
+    } catch (error) {
       lastError = error;
       if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt));
     }
@@ -62,8 +78,9 @@ ${boundedText}
     return summary;
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes(ErrorCode.AI_SUMMARIZATION_FAILED)) throw error;
-    logger.error('AI_SERVICE', 'Summarization failed', error);
-    throw new Error(`[${ErrorCode.AI_SUMMARIZATION_FAILED}] Failed to generate document summary. Please check your API key and model configuration.`);
+    const code = providerErrorCode(error);
+    logger.error('AI_SERVICE', `Summarization failed [${code}]`, error);
+    throw new Error(`[${code}] AI summarization could not be completed.`);
   }
 }
 
@@ -80,8 +97,9 @@ export async function generateEmbedding(apiKey: string, embeddingModelName: stri
     return embedding;
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes(ErrorCode.AI_EMBEDDING_FAILED)) throw error;
-    logger.error('AI_SERVICE', 'Embedding generation failed', error);
-    throw new Error(`[${ErrorCode.AI_EMBEDDING_FAILED}] Failed to generate embedding. Please check your API key and embedding model configuration.`);
+    const code = providerErrorCode(error);
+    logger.error('AI_SERVICE', `Embedding generation failed [${code}]`, error);
+    throw new Error(`[${code}] AI embedding generation could not be completed.`);
   }
 }
 
