@@ -100,6 +100,12 @@ export const publicReviewSchema = z.object({
   rating: z.coerce.number().int().min(1).max(5),
   feedback: z.string().trim().min(1).max(2000),
 });
+export const adminSettingsSchema = z.object({
+  google_analytics_id: z.string().max(50).nullable().optional(),
+  termly_uuid: z.string().max(50).nullable().optional(),
+  privacy_policy_content: z.string().max(100_000).nullable().optional(),
+  terms_of_service_content: z.string().max(100_000).nullable().optional(),
+}).strict();
 
 declare global {
   namespace Express {
