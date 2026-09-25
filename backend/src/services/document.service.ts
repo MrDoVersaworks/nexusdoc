@@ -138,7 +138,7 @@ export async function uploadDocument(input: UploadDocumentInput): Promise<Docume
     return toDetail(inserted);
   } catch (error: unknown) {
     try {
-      await del(blob.url, { access: 'private', token: config.BLOB_READ_WRITE_TOKEN });
+      await del(blob.url, { token: config.BLOB_READ_WRITE_TOKEN });
     } catch (cleanupError) {
       await recordCleanupFailure(blob.url, userId, 'upload-compensation', cleanupError);
     }
@@ -192,7 +192,7 @@ export async function deleteDocument(userId: string, documentId: string): Promis
   if (!config.BLOB_READ_WRITE_TOKEN) throw new Error(`[${ErrorCode.DOC_UPLOAD_FAILED}] File storage is not configured.`);
 
   try {
-    await del(docs[0].file_url, { access: 'private', token: config.BLOB_READ_WRITE_TOKEN });
+    await del(docs[0].file_url, { token: config.BLOB_READ_WRITE_TOKEN });
   } catch (error: unknown) {
     await recordCleanupFailure(docs[0].file_url, userId, 'document-delete', error);
     throw new Error(`[${ErrorCode.INTERNAL_ERROR}] Document storage cleanup failed; the document was retained. Please retry.`);
