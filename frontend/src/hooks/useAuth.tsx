@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function restoreSession() {
       try {
-        const data = await apiRequest<ApiResponse<{ accessToken: string }>>({
+        const data = await apiRequest<ApiResponse<LoginResponse>>({
           method: 'POST',
           path: '/api/auth/refresh',
           requiresAuth: false,
