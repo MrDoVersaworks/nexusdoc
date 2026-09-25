@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Database, Lock, Search, FileText, Server, TrendingUp, Code2 } from 'lucide-react';
+import { ArrowRight, Sparkles, Database, Lock, Search, TrendingUp, Code2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { PlatformReviews } from '@/components/PlatformReviews';
