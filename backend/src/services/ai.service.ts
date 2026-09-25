@@ -42,7 +42,9 @@ async function withRetry<T>(operation: () => Promise<T>, attempts: number): Prom
       return await withTimeout(operation(), AI_TIMEOUT_MS);
     } catch (error) {
       lastError = error;
-      if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt));
+      const code = providerErrorCode(error);
+      const retryable = code !== ErrorCode.AI_QUOTA_EXCEEDED && code !== ErrorCode.AI_AUTH_FAILED;
+      if (attempt < attempts && retryable) await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt));
     }
   }
   throw lastError;
