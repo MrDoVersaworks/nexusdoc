@@ -14,10 +14,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const { login, isAuthenticated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    setHydrated(true);
     if (isAuthenticated) router.replace('/dashboard');
   }, [isAuthenticated, router]);
 
@@ -79,6 +81,7 @@ export default function LoginPage() {
                 onClick={() => setShowPassword((visible) => !visible)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                 aria-pressed={showPassword}
+                disabled={!hydrated}
                 title={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
