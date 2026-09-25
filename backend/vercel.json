@@ -1,17 +1,7 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "src/index.ts",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "src/index.ts"
-    }
-  ],
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "express",
+  "buildCommand": "if [ \"$VERCEL_ENV\" = \"production\" ]; then npm run db:migrate; else echo 'Skipping production database migration for preview deployment'; fi",
   "crons": [
     {
       "path": "/api/internal/storage-cleanup",
