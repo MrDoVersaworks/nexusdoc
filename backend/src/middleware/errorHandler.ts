@@ -38,6 +38,10 @@ const CLIENT_ERROR_MESSAGES: Record<string, { statusCode: number; message: strin
   },
 };
 
+export function getClientErrorDetails(code: string): { statusCode: number; message: string } | undefined {
+  return CLIENT_ERROR_MESSAGES[code];
+}
+
 function errorCodeFromMessage(message: string): string | null {
   const match = message.match(/^\[([A-Z0-9_]+)\]/);
   return match?.[1] ?? null;
