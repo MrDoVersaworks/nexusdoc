@@ -2,13 +2,13 @@ name: NexusDoc CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main, audit-remediation]
   pull_request:
-    branches: [ main ]
+    branches: [main, audit-remediation]
 
 jobs:
-  backend-audit:
-    name: Backend — Type Check
+  backend:
+    name: Backend — build and contract tests
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -19,17 +19,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: './backend/package-lock.json'
-      - run: npm install
-      - name: Type Check
-        run: npx tsc --noEmit
+      - run: npm ci
+      - name: Type Check / Build
+        run: npm run build
         env:
-          JWT_SECRET: ci_secret_key_for_testing_purposes_only_32bytes
+          JWT_ACCESS_SECRET: ci_access_secret_key_for_testing_purposes_only_32bytes
+          JWT_REFRESH_SECRET: ci_refresh_secret_key_for_testing_purposes_only_32bytes
+          AES_ENCRYPTION_KEY: ci_aes_key_32bytes_long_for_testing
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ci_db
+          CORS_ORIGIN: http://localhost:3001
+      - name: Contract tests
+        run: npm test
 
-  frontend-audit:
-    name: Frontend — Type Check
+  frontend:
+    name: Frontend — lint, type check, and production build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -40,10 +45,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: './frontend/package-lock.json'
-      - run: npm install
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
       - name: Type Check
         run: npx tsc --noEmit --skipLibCheck
         env:
-          NEXT_PUBLIC_API_URL: http://localhost:3000
+          NEXT_PUBLIC_API_URL: http://localhost:4000
+      - name: Production Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:4000
