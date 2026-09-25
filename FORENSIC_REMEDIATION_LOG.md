@@ -222,3 +222,24 @@ The frontend presentation polish completed the full GitHub CI suite successfully
 Vercel project inspection was also continued through the connected account. No unresolved Vercel Toolbar threads were present for the NexusDoc backend project on `audit-remediation`. The deployment-access tooling is available for protected previews, so protected-preview access is treated as an operational access concern rather than a reason to weaken application security.
 
 The visual pass remains presentation-only. The remediation branch still does not modify `main`.
+
+
+## Independent Vercel continuation checkpoint — 2026-09-25
+
+The Vercel verification was continued without requiring user intervention.
+
+Current repository/deployment facts observed:
+
+- The remediation branch remains isolated from `main`. GitHub comparison currently reports `audit-remediation` as 109 commits ahead and 0 behind `main`; `main` remains at `351dcff05c848498e577f7f71a39131a20bd6058`.
+- The latest READY NexusDoc frontend deployment exposed by the connected Vercel project is preview commit `9b11c45814b327485c8a8914eee94f7439de5343`. It is not a deployment of the later UI-polish commit `d63eacb6064b9875a7c6036c8d379b4267767433`.
+- The latest READY NexusDoc backend deployment exposed by Vercel is preview commit `0316e2d1819a90ef585be8aa5d537e86b49f91a2`. It is not a production promotion.
+- The Vercel frontend project reported no grouped runtime-error clusters in the checked seven-day window.
+- No unresolved Vercel Toolbar threads were found for the frontend `audit-remediation` branch.
+- A temporary Vercel protected-preview access URL could be generated, but the fetch path redirected into Vercel SSO rather than yielding the rendered application. Therefore no visual claim is made from that access attempt.
+- The available direct deployment API requires a complete file payload. A partial deployment was not attempted because doing so could produce an incomplete artifact and would violate the remediation requirement to preserve functionality.
+
+### Disposition
+
+The remaining gap is deployment/visual verification of the later presentation-only UI polish, not a demonstrated application failure. Repository CI already passed on the UI-polish commit, including frontend lint, TypeScript, production build, Chromium installation, and public Playwright smoke. The connected Vercel account independently shows the prior remediation deployments are READY and shows no current runtime-error cluster for the frontend project.
+
+No production promotion, rollback, or `main` mutation was performed. Further live visual verification would require either a Vercel deployment containing the later UI commit or an authenticated browser session capable of consuming the protected preview; neither is necessary to preserve the security posture, and neither was fabricated as completed.
