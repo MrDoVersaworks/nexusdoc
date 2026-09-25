@@ -18,10 +18,12 @@ export default function RegisterPage() {
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const { register, isAuthenticated } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
+    setHydrated(true);
     if (isAuthenticated) router.replace('/dashboard');
   }, [isAuthenticated, router]);
 
@@ -108,6 +110,7 @@ export default function RegisterPage() {
                 onClick={() => setShowPassword((visible) => !visible)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                 aria-pressed={showPassword}
+                disabled={!hydrated}
                 title={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
@@ -133,7 +136,8 @@ export default function RegisterPage() {
                 className={styles.passwordToggle}
                 onClick={() => setShowConfirmPassword((visible) => !visible)}
                 aria-label={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'}
-                aria-pressed={showConfirmPassword}
+aria-pressed={showConfirmPassword}
+                disabled={!hydrated}
                 title={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'}
               >
                 {showConfirmPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
