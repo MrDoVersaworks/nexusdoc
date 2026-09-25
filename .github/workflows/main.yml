@@ -33,7 +33,7 @@ jobs:
       - name: Contract tests
         run: npm test
       - name: Migration consistency
-        run: npx drizzle-kit check:pg
+        run: npm run test:migrations
 
   frontend:
     name: Frontend — lint, type check, and production build
