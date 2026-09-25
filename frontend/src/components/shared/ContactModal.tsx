@@ -46,10 +46,13 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.header}>
-          <h3 style={styles.title}>✉️ Secure Developer Contact</h3>
-          <button style={styles.closeBtn} onClick={onClose} aria-label="Close">✕</button>
+          <div>
+            <h3 style={styles.title}>Developer contact</h3>
+            <p style={styles.subtitle}>Send a support inquiry or professional message.</p>
+          </div>
+          <button style={styles.closeBtn} onClick={onClose} aria-label="Close">×</button>
         </div>
-        <p style={styles.infoText}>Send a support inquiry or professional message. Automated abuse controls run on the server.</p>
+        <p style={styles.infoText}>Automated abuse controls run on the server.</p>
         <form onSubmit={handleSubmit} style={styles.form}>
           <label style={styles.label}>Name<input style={styles.input} value={name} onChange={(e) => setName(e.target.value)} maxLength={255} required /></label>
           <label style={styles.label}>Email<input style={styles.input} type="email" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={255} required /></label>
@@ -57,7 +60,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
           <label style={styles.honeypot}>Website<input value={website} onChange={(e) => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" /></label>
           <div style={styles.actions}>
             <button type="button" onClick={onClose} style={styles.cancelButton} disabled={isSubmitting}>Cancel</button>
-            <button type="submit" style={styles.submitButton} disabled={isSubmitting}>{isSubmitting ? 'Sending...' : 'Send Message'}</button>
+            <button type="submit" style={styles.submitButton} disabled={isSubmitting}>{isSubmitting ? 'Sending…' : 'Send message'}</button>
           </div>
         </form>
       </div>
@@ -66,18 +69,19 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
 }
 
 const styles: { [key: string]: React.CSSProperties } = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(5,5,10,.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 20 },
-  modal: { background: '#0c0f1d', border: '1px solid rgba(108,92,231,.25)', borderRadius: 16, padding: 28, width: '100%', maxWidth: 480, boxShadow: '0 20px 40px rgba(0,0,0,.5)' },
-  header: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
-  title: { margin: 0, fontSize: 18, fontWeight: 700, color: '#fff' },
-  closeBtn: { background: 'none', border: 0, color: '#a0aed0', fontSize: 20, cursor: 'pointer' },
-  infoText: { fontSize: 13, color: '#8a99ad', lineHeight: 1.5, marginBottom: 20 },
-  form: { display: 'flex', flexDirection: 'column', gap: 16 },
-  label: { display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, fontWeight: 600, color: '#a0aed0', textTransform: 'uppercase', letterSpacing: '.05em' },
-  input: { background: 'rgba(15,23,42,.6)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 8, padding: '10px 14px', color: '#fff', fontSize: 14, outline: 'none' },
-  textarea: { background: 'rgba(15,23,42,.6)', border: '1px solid rgba(255,255,255,.1)', borderRadius: 8, padding: '12px 14px', color: '#fff', fontSize: 14, outline: 'none', resize: 'vertical' },
+  overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,.62)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 20 },
+  modal: { background: '#111316', border: '1px solid #3a3d44', borderRadius: 16, padding: 28, width: '100%', maxWidth: 480, boxShadow: '0 20px 50px rgba(0,0,0,.34)' },
+  header: { display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 18 },
+  title: { margin: 0, fontSize: 18, fontWeight: 600, color: '#f5f5f7', letterSpacing: '-.02em' },
+  subtitle: { margin: '4px 0 0', fontSize: 13, color: '#a1a1aa', lineHeight: 1.5 },
+  closeBtn: { background: 'transparent', border: 0, color: '#a1a1aa', fontSize: 26, lineHeight: 1, cursor: 'pointer', padding: 2 },
+  infoText: { fontSize: 13, color: '#71717a', lineHeight: 1.5, marginBottom: 18 },
+  form: { display: 'flex', flexDirection: 'column', gap: 14 },
+  label: { display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, fontWeight: 600, color: '#a1a1aa', textTransform: 'uppercase', letterSpacing: '.04em' },
+  input: { background: '#0d0f12', border: '1px solid #27292e', borderRadius: 10, padding: '11px 13px', color: '#f5f5f7', fontSize: 14, outline: 'none' },
+  textarea: { background: '#0d0f12', border: '1px solid #27292e', borderRadius: 10, padding: '11px 13px', color: '#f5f5f7', fontSize: 14, outline: 'none', resize: 'vertical' },
   honeypot: { position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' },
-  actions: { display: 'flex', justifyContent: 'flex-end', gap: 12, marginTop: 8 },
-  cancelButton: { background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)', color: '#a0aed0', borderRadius: 8, padding: '10px 18px', cursor: 'pointer' },
-  submitButton: { background: '#6c5ce7', border: 0, color: '#fff', borderRadius: 8, padding: '10px 20px', fontWeight: 600, cursor: 'pointer' },
+  actions: { display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 },
+  cancelButton: { background: 'transparent', border: '1px solid #3a3d44', color: '#a1a1aa', borderRadius: 10, padding: '10px 16px', cursor: 'pointer' },
+  submitButton: { background: '#6c5ce7', border: 0, color: '#fff', borderRadius: 10, padding: '10px 18px', fontWeight: 600, cursor: 'pointer' },
 };
