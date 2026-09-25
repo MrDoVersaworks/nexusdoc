@@ -7,7 +7,7 @@ import { config } from '../config/index.js';
 
 const router = Router();
 
-router.post('/', async (req: Request, res: Response): Promise<void> => {
+router.get('/', async (req: Request, res: Response): Promise<void> => {
   if (!config.CRON_SECRET || req.headers.authorization !== `Bearer ${config.CRON_SECRET}`) {
     res.status(401).json({ success: false, error: { code: 'ERR_CRON_UNAUTHORIZED', message: 'Unauthorized cleanup request.' } });
     return;
