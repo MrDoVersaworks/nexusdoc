@@ -44,11 +44,10 @@ export const REFRESH_COOKIE_NAME = 'nexusdoc_refresh_token';
 // ============================================================
 // RATE LIMITING
 // ============================================================
-export const AUTH_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-export const AUTH_RATE_LIMIT_MAX_REQUESTS = 20; // Tightened for security
-
-export const API_RATE_LIMIT_WINDOW_MS = 1 * 60 * 1000; // 1 minute
-export const API_RATE_LIMIT_MAX_REQUESTS = 60; // 60 requests per minute for general API
+export const AUTH_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+export const AUTH_RATE_LIMIT_MAX_REQUESTS = 20;
+export const API_RATE_LIMIT_WINDOW_MS = 1 * 60 * 1000;
+export const API_RATE_LIMIT_MAX_REQUESTS = 60;
 export const CONTACT_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 export const CONTACT_RATE_LIMIT_MAX_REQUESTS = 5;
 
@@ -83,6 +82,9 @@ export enum ErrorCode {
   AI_NO_MODEL = 'ERR_AI_NO_MODEL',
   AI_SUMMARIZATION_FAILED = 'ERR_AI_SUMMARIZATION_FAILED',
   AI_EMBEDDING_FAILED = 'ERR_AI_EMBEDDING_FAILED',
+  AI_QUOTA_EXCEEDED = 'ERR_AI_QUOTA_EXCEEDED',
+  AI_AUTH_FAILED = 'ERR_AI_AUTH_FAILED',
+  AI_PROVIDER_UNAVAILABLE = 'ERR_AI_PROVIDER_UNAVAILABLE',
 
   // Settings
   SETTINGS_UPDATE_FAILED = 'ERR_SETTINGS_UPDATE_FAILED',
