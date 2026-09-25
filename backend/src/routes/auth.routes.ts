@@ -7,7 +7,6 @@ import { registerSchema, loginSchema, deleteAccountSchema } from '../types';
 import { config } from '../config';
 import { REFRESH_COOKIE_NAME, REFRESH_TOKEN_EXPIRY_DAYS } from '../constants';
 import { asyncHandler } from '../utils/asyncHandler';
-import { jwtBlocklist } from '../utils/blocklist';
 import {
   registerUser, loginUser, refreshAccessToken, logoutUser, deleteUserAccount,
 } from '../services/auth.service';
@@ -84,12 +83,6 @@ router.post('/refresh', originGuard, asyncHandler(async (req: Request, res: Resp
 router.post('/logout', originGuard, asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const refreshToken = req.cookies[REFRESH_COOKIE_NAME];
   if (refreshToken) await logoutUser(refreshToken);
-  const authHeader = req.headers.authorization;
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.slice('Bearer '.length);
-    const signature = token.split('.')[2];
-    if (signature) jwtBlocklist.add(signature);
-  }
   clearRefreshCookie(res);
   res.status(200).json({ success: true, data: null });
 }));
