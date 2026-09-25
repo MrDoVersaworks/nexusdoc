@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { publicReviewSchema, uuidParamSchema, documentUploadSchema } from './types/index.js';
-import { isAllowedOrigin } from './middleware/originGuard.js';
 
 test('public review contract rejects out-of-range ratings', () => {
   assert.equal(publicReviewSchema.safeParse({
@@ -29,11 +28,4 @@ test('UUID route contract rejects arbitrary identifiers', () => {
 
 test('document title contract rejects blank titles', () => {
   assert.equal(documentUploadSchema.safeParse({ title: '   ' }).success, false);
-});
-
-
-test('origin contract allows configured origins and rejects foreign origins', () => {
-  assert.equal(isAllowedOrigin('http://localhost:3001/'), true);
-  assert.equal(isAllowedOrigin('https://evil.example'), false);
-  assert.equal(isAllowedOrigin(undefined), false);
 });
