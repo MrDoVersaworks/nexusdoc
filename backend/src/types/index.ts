@@ -75,7 +75,7 @@ export const deleteAccountSchema = z.object({
   password: z.string().min(1, 'Password is required for account deletion'),
 });
 export const documentUploadSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(255, 'Title must not exceed 255 characters').trim(),
+  title: z.string().trim().min(1, 'Title is required').max(255, 'Title must not exceed 255 characters'),
 });
 export const searchSchema = z.object({
   query: z.string().min(1, 'Search query is required').max(500, 'Search query must not exceed 500 characters').trim(),
