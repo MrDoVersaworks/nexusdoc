@@ -1,140 +1,58 @@
-.header {
-  margin-bottom: var(--space-2xl);
-}
-
+.header { margin-bottom: 36px; }
 .greeting {
   font-size: clamp(var(--font-2xl), 4vw, var(--font-4xl));
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
 }
-
 .subtitle {
   color: var(--text-secondary);
-  font-size: var(--font-lg);
-  margin-top: var(--space-sm);
+  font-size: var(--font-base);
+  margin-top: 7px;
 }
-
-/* ============================================================
-   STATS GRID
-   ============================================================ */
 .statsGrid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
-  gap: var(--space-md);
-  margin-bottom: var(--space-2xl);
+  gap: 12px;
+  margin-bottom: 36px;
 }
-
 .statCard {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: 14px;
 }
-
 .statIcon {
-  font-size: var(--font-3xl);
-  width: 56px;
-  height: 56px;
+  font-size: 1.5rem;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: var(--bg-tertiary);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
   flex-shrink: 0;
 }
-
-.userEmail {
-  font-size: 0.75rem;
-  color: var(--text-dim);
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.statLabel {
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
-  margin-bottom: var(--space-xs);
-}
-
-.statValue {
-  font-size: var(--font-2xl);
-  font-weight: 700;
-}
-
-.statusActive {
-  color: #00b894;
-}
-
-.statusInactive {
-  color: var(--text-muted);
-  font-size: var(--font-lg);
-}
-
-/* ============================================================
-   QUICK ACTIONS
-   ============================================================ */
-.sectionTitle {
-  font-size: var(--font-xl);
-  font-weight: 700;
-  margin-bottom: var(--space-md);
-}
-
+.statLabel { font-size: var(--font-sm); color: var(--text-secondary); margin-bottom: 3px; }
+.statValue { font-size: var(--font-2xl); font-weight: 700; }
+.statusActive { color: var(--success); }
+.statusInactive { color: var(--text-muted); font-size: var(--font-lg); }
+.sectionTitle { font-size: var(--font-xl); font-weight: 600; margin-bottom: 14px; }
 .actionsGrid {
   display: grid;
   grid-template-columns: repeat(1, 1fr);
-  gap: var(--space-md);
+  gap: 12px;
 }
-
-.actionCard {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  text-decoration: none;
-  color: inherit;
-  cursor: pointer;
-}
-
-.actionCard:hover {
-  transform: translateY(-2px);
-}
-
-.actionIcon {
-  font-size: var(--font-3xl);
-}
-
-.actionLabel {
-  font-size: var(--font-base);
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.actionDesc {
-  font-size: var(--font-sm);
-  color: var(--text-secondary);
-}
-
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+.actionCard { display: flex; flex-direction: column; gap: 8px; text-decoration: none; color: inherit; cursor: pointer; }
+.actionCard:hover { transform: translateY(-1px); }
+.actionIcon { font-size: 1.5rem; color: var(--accent-primary); }
+.actionLabel { font-size: var(--font-base); font-weight: 600; color: var(--text-primary); }
+.actionDesc { font-size: var(--font-sm); color: var(--text-secondary); }
 @media (min-width: 768px) {
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .actionsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .statsGrid { grid-template-columns: repeat(2, 1fr); }
+  .actionsGrid { grid-template-columns: repeat(2, 1fr); }
 }
-
 @media (min-width: 1024px) {
-  .statsGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-
-  .actionsGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  .statsGrid { grid-template-columns: repeat(4, 1fr); }
+  .actionsGrid { grid-template-columns: repeat(3, 1fr); }
 }
