@@ -3,121 +3,55 @@ import multer from 'multer';
 import { authMiddleware } from '../middleware/auth';
 import { apiRateLimiter } from '../middleware/rateLimiter';
 import { validate } from '../middleware/validate';
-import { documentUploadSchema, searchSchema, paginationSchema } from '../types';
+import { documentUploadSchema, searchSchema, paginationSchema, uuidParamSchema } from '../types';
 import { MAX_FILE_SIZE_BYTES } from '../constants';
 import { asyncHandler } from '../utils/asyncHandler';
-import {
-  uploadDocument,
-  listDocuments,
-  getDocument,
-  deleteDocument,
-} from '../services/document.service.js';
+import { uploadDocument, listDocuments, getDocument, deleteDocument, downloadDocument } from '../services/document.service.js';
 import { semanticSearch } from '../services/search.service.js';
-import { cacheMiddleware, invalidateCache } from '../utils/cache.js';
 
 const router = Router();
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: MAX_FILE_SIZE_BYTES } });
 
-// Multer config — memory storage, size limit
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_FILE_SIZE_BYTES },
-});
-
-// All document routes require auth and API rate limiting
 router.use(authMiddleware);
 router.use(apiRateLimiter);
 
-// GET /api/documents
-router.get('/', cacheMiddleware(60), asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const userId = req.userId!;
-  const parsed = paginationSchema.parse(req.query);
-
+router.get('/', validate(paginationSchema, 'query'), asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const result = await listDocuments({
-    userId,
-    page: parsed.page,
-    limit: parsed.limit,
-    sort: parsed.sort,
-    order: parsed.order,
+    userId: req.userId!,
+    page: Number(req.query.page),
+    limit: Number(req.query.limit),
+    sort: String(req.query.sort),
+    order: String(req.query.order),
   });
-
-  res.status(200).json({
-    success: true,
-    data: result.documents,
-    pagination: result.pagination,
-  });
+  res.status(200).json({ success: true, data: result.documents, pagination: result.pagination });
 }));
 
-// POST /api/documents
-router.post(
-  '/',
-  upload.single('file'),
-  validate(documentUploadSchema),
-  asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.userId!;
-    const { title } = req.body;
-
-    if (!req.file) {
-      res.status(400).json({
-        success: false,
-        error: { code: 'ERR_DOC_NO_FILE', message: 'No file provided.' },
-      });
-      return;
-    }
-
-    const document = await uploadDocument({ userId, title, file: req.file });
-
-    invalidateCache('/api/documents', userId);
-
-    res.status(201).json({
-      success: true,
-      data: document,
-    });
-  })
-);
-
-// POST /api/documents/search
-router.post(
-  '/search',
-  validate(searchSchema),
-  asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.userId!;
-    const { query } = req.body;
-
-    const results = await semanticSearch(userId, query);
-
-    res.status(200).json({
-      success: true,
-      data: results,
-    });
-  })
-);
-
-// GET /api/documents/:id
-router.get('/:id', cacheMiddleware(60), asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const userId = req.userId!;
-  const documentId = req.params.id;
-
-  const document = await getDocument(userId, documentId);
-
-  res.status(200).json({
-    success: true,
-    data: document,
-  });
+router.post('/', upload.single('file'), validate(documentUploadSchema), asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  if (!req.file) {
+    res.status(400).json({ success: false, error: { code: 'ERR_DOC_NO_FILE', message: 'No file provided.' } });
+    return;
+  }
+  const document = await uploadDocument({ userId: req.userId!, title: req.body.title, file: req.file });
+  res.status(201).json({ success: true, data: document });
 }));
 
-// DELETE /api/documents/:id
-router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<void> => {
-  const userId = req.userId!;
-  const documentId = req.params.id;
+router.post('/search', validate(searchSchema), asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const results = await semanticSearch(req.userId!, req.body.query);
+  res.status(200).json({ success: true, data: results });
+}));
 
-  await deleteDocument(userId, documentId);
+router.get('/:id', validate(uuidParamSchema, 'params'), asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const document = await getDocument(req.userId!, req.params.id);
+  res.status(200).json({ success: true, data: document });
+}));
 
-  invalidateCache('/api/documents', userId);
+router.get('/:id/download', validate(uuidParamSchema, 'params'), asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  await downloadDocument(req.userId!, req.params.id, res);
+}));
 
-  res.status(200).json({
-    success: true,
-    data: null,
-  });
+router.delete('/:id', validate(uuidParamSchema, 'params'), asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  await deleteDocument(req.userId!, req.params.id);
+  res.status(200).json({ success: true, data: null });
 }));
 
 export default router;
